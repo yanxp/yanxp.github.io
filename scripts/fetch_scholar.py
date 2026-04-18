@@ -1,59 +1,64 @@
 #!/usr/bin/env python3
 """Fetch Google Scholar citation stats and write them to assets/data/scholar.json.
 
-Scrapes the public profile page (no API key needed). If scraping fails, keeps
-the previous JSON intact so the site never shows zeroed-out numbers.
+Uses the SerpAPI Google Scholar Author engine (https://serpapi.com/google-scholar-author-api).
+A SERPAPI_KEY environment variable is required. If the API call fails, the previous
+JSON is kept intact so the site never shows zeroed-out numbers.
 """
 from __future__ import annotations
 
 import datetime as _dt
 import json
+import os
 import pathlib
-import re
 import sys
-import urllib.request
 import urllib.error
+import urllib.parse
+import urllib.request
 
 USER_ID = "dwSBmqkAAAAJ"
 PROFILE_URL = f"https://scholar.google.com/citations?user={USER_ID}&hl=en"
+SERPAPI_ENDPOINT = "https://serpapi.com/search.json"
 OUTPUT_PATH = pathlib.Path(__file__).resolve().parent.parent / "assets" / "data" / "scholar.json"
 
-USER_AGENT = (
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-)
 
-
-def fetch_html(url: str, timeout: int = 20) -> str:
-    headers = {
-        "User-Agent": USER_AGENT,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "identity",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
+def fetch_serpapi(api_key: str, timeout: int = 30) -> dict:
+    params = {
+        "engine": "google_scholar_author",
+        "author_id": USER_ID,
+        "hl": "en",
+        "api_key": api_key,
     }
-    req = urllib.request.Request(url, headers=headers)
+    url = f"{SERPAPI_ENDPOINT}?{urllib.parse.urlencode(params)}"
+    req = urllib.request.Request(url, headers={"Accept": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read().decode("utf-8", errors="replace")
+        return json.loads(resp.read().decode("utf-8"))
 
 
-def parse_stats(html: str) -> dict[str, int]:
-    """Extract the three 'all time' stats from the gsc_rsb_std cells.
+def parse_stats(payload: dict) -> dict[str, int]:
+    """Extract the three 'all time' stats from SerpAPI's cited_by.table.
 
-    The Scholar stats table renders 6 cells in order:
-    [citations_all, citations_since, h_index_all, h_index_since,
-     i10_all, i10_since]. We only keep the 'all time' values.
+    The table is a list of three single-key dicts in the order:
+      [{citations: {all, since_YYYY}}, {h_index: {...}}, {i10_index: {...}}]
     """
-    cells = re.findall(r'<td class="gsc_rsb_std">(\d+)</td>', html)
-    if len(cells) < 6:
-        raise RuntimeError(
-            f"Scholar page layout changed: expected >=6 gsc_rsb_std cells, got {len(cells)}"
-        )
+    if payload.get("error"):
+        raise RuntimeError(f"SerpAPI error: {payload['error']}")
+
+    cited_by = payload.get("cited_by") or {}
+    table = cited_by.get("table") or []
+
+    def pick(key: str) -> int:
+        for row in table:
+            if key in row:
+                value = row[key].get("all")
+                if isinstance(value, int):
+                    return value
+        raise RuntimeError(f"SerpAPI response missing cited_by.table[*].{key}.all")
+
     return {
-        "citations": int(cells[0]),
-        "h_index": int(cells[2]),
-        "i10_index": int(cells[4]),
+        "citations": pick("citations"),
+        "h_index": pick("h_index"),
+        "i10_index": pick("i10_index"),
     }
 
 
@@ -75,33 +80,46 @@ def write_json(data: dict) -> None:
 
 
 def main() -> int:
-    existing = load_existing()
-    try:
-        html = fetch_html(PROFILE_URL)
-        stats = parse_stats(html)
-    except (urllib.error.URLError, RuntimeError, TimeoutError) as exc:
-        print(f"[fetch_scholar] WARN: scraping failed — keeping previous data. {exc}",
-              file=sys.stderr)
+    api_key = os.environ.get("SERPAPI_KEY", "").strip()
+    if not api_key:
+        print(
+            "[fetch_scholar] ERROR: SERPAPI_KEY env var is empty. "
+            "Add a repo secret named SERPAPI_KEY (https://serpapi.com/manage-api-key).",
+            file=sys.stderr,
+        )
         return 1
 
-    payload = {
-        "source": "https://scholar.google.com/citations?user=" + USER_ID,
+    existing = load_existing()
+    try:
+        payload = fetch_serpapi(api_key)
+        stats = parse_stats(payload)
+    except (urllib.error.URLError, RuntimeError, TimeoutError, json.JSONDecodeError) as exc:
+        print(
+            f"[fetch_scholar] WARN: SerpAPI request failed — keeping previous data. {exc}",
+            file=sys.stderr,
+        )
+        # Exit 0 so the workflow does not show a red X on transient API failures;
+        # the previous scholar.json is left untouched.
+        return 0
+
+    out = {
+        "source": PROFILE_URL,
         "updated_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
         **stats,
     }
 
     if (
-        existing.get("citations") == payload["citations"]
-        and existing.get("h_index") == payload["h_index"]
-        and existing.get("i10_index") == payload["i10_index"]
+        existing.get("citations") == out["citations"]
+        and existing.get("h_index") == out["h_index"]
+        and existing.get("i10_index") == out["i10_index"]
     ):
         print("[fetch_scholar] no change — skipping write")
         return 0
 
-    write_json(payload)
+    write_json(out)
     print(
-        f"[fetch_scholar] updated: citations={payload['citations']}, "
-        f"h-index={payload['h_index']}, i10-index={payload['i10_index']}"
+        f"[fetch_scholar] updated: citations={out['citations']}, "
+        f"h-index={out['h_index']}, i10-index={out['i10_index']}"
     )
     return 0
 
