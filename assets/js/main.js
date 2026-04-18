@@ -153,7 +153,11 @@
                 var id = btn.getAttribute('data-bibtex');
                 var src = id && document.getElementById(id);
                 if (!src) return;
-                var text = src.textContent.trim();
+                // <template> holds its children in a DocumentFragment at `.content`
+                // whose textContent we need; plain elements use their own textContent.
+                var source = src.content || src;
+                var text = (source.textContent || '').trim();
+                if (!text) return;
                 var done = function () {
                     var original = btn.textContent;
                     btn.classList.add('is-copied');
