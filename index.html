@@ -1,182 +1,161 @@
-
 <!DOCTYPE html>
-<!-- saved from url=(0051)http://getbootstrap.com/examples/navbar-fixed-top/# -->
-<html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="baidu-site-verification" content="codeva-Ey59HhZwY2" />
-<title>Xiaopeng Yan (严肖朋) | 中山大学 </title>
-<meta name="description" content="Xiaopeng Yan's Homepage">
- <meta name="keyword" content="严肖朋,Xiaopeng Yan,yanxp,yan xiaopeng">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="baidu-site-verification" content="codeva-Ey59HhZwY2">
+    <title>Xiaopeng Yan (严肖朋) — Personal Homepage</title>
+    <meta name="description" content="Xiaopeng Yan (严肖朋) — Retrieval algorithm researcher at ByteDance. Homepage.">
+    <meta name="keyword" content="严肖朋,Xiaopeng Yan,yanxp,yan xiaopeng">
+    <meta property="og:title" content="Xiaopeng Yan (严肖朋)">
+    <meta property="og:description" content="Xiaopeng Yan's Homepage.">
+    <meta property="og:type" content="website">
 
-<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="bootstrap/css/bootstrap.css">
-<script src="jquery/jquery-1.9.1.min.js"></script>
-<script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <script src="./assets/js/main.js"></script>
 
-<style type="text/css">  
-
-body {
-            font-family: Geneva, Arial, Helvetica, sans-serif;
-            font-size: 16px;
-            background-color: #f5f5f5;
-        }
-
-
-
-.Bar_Div{
-	background-color: #F8F8FF; position: fixed; z-index: 99; width: 100%; margin-left: -10%;
-}
-
-p{
-	text-align:justify; 
-}
-
-.panel-heading {
-	font-family: Geneva, Arial, Helvetica, sans-serif;
-    color: inherit;
-    font-weight: 600;
-    
-    font-size: 20px;
- }
- .second-heading {
-	font-family: Geneva, Arial, Helvetica, sans-serif;
-    color: inherit;
-    font-weight: 550;
-    font-size: 16px;
-    margin-bottom: 10px;
- }
- .Text-context {
-	font-family: Geneva, Arial, Helvetica, sans-serif;
-    color: inherit;
-    font-weight: 500;
-    font-size: 16px;
-	
-	line-height: 18px;
-	margin:4px auto 0 auto;
- }
- 
- .li_style{
-	line-height:18px;
-	
- }
-
-</style>
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?98402e3a332476e31e16060029bd8945";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?98402e3a332476e31e16060029bd8945";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
 </head>
 <body>
+    <nav class="nav" aria-label="Primary">
+        <div class="nav-inner">
+            <a class="nav-brand" href="./index.html">
+                <span class="dot" aria-hidden="true"></span>
+                <span>Xiaopeng Yan · 严肖朋</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="./index.html" class="active">Home</a></li>
+                <li><a href="./Publication.html">Publications</a></li>
+                <li><a href="./Project.html">Projects</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle theme">
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
 
+    <main>
+        <!-- ================= Hero ================= -->
+        <section class="hero" aria-label="Introduction">
+            <img class="hero-avatar" src="./imgs/yanxp_pic_1.jpg" alt="Portrait of Xiaopeng Yan">
+            <div>
+                <h1 class="hero-name">Xiaopeng Yan</h1>
+                <div class="hero-subtitle">严肖朋 · Retrieval Algorithm Researcher</div>
+                <p class="hero-bio">
+                    I am currently a retrieval algorithm researcher at <a href="https://www.bytedance.com/">ByteDance</a>,
+                    Douyin Push Team. Before March 2024 I was a video retrieval algorithm researcher at the AI Platform
+                    of TEG, <a href="https://www.tencent.com/">Tencent</a>, and before April 2021 I worked at the EIG
+                    research center as a computer vision researcher at <a href="https://www.sensetime.com/">SenseTime</a>.
+                    I received my M.S. in computer science from the
+                    <a href="http://www.sysu-hcp.net/home/">Human Cyber Physical Intelligence Integration Lab</a>
+                    of <a href="http://www.sysu.edu.cn">Sun Yat-sen University</a> in 2019, advised by
+                    Prof. <a href="http://www.linliang.net/">Liang Lin</a> and
+                    Prof. <a href="http://sdcs.sysu.edu.cn/content/2504">Hui Cheng</a>. I received my B.E.
+                    in automation from the <a href="http://seit.sysu.edu.cn/">School of Electronics and Information Technology</a>.
+                </p>
+                <p class="hero-meta">Email: <code>sysuyanxp (at) gmail.com</code></p>
+                <div class="hero-links">
+                    <a class="chip" href="./files/CV_XiaopengYan.pdf">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        CV
+                    </a>
+                    <a class="chip" href="https://scholar.google.com/citations?user=dwSBmqkAAAAJ&hl=zh-TW">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 4 2 10l10 6 10-6z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                        Google Scholar
+                    </a>
+                    <a class="chip" href="https://github.com/yanxp">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.305-5.466-1.335-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        GitHub
+                    </a>
+                    <a class="chip" href="mailto:sysuyanxp@gmail.com">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Email
+                    </a>
+                </div>
+            </div>
+        </section>
 
+        <!-- ================= News ================= -->
+        <section class="section" aria-labelledby="news-title">
+            <h2 class="section-title" id="news-title">News</h2>
+            <ul class="news">
+                <li><span class="date">2024 / 03</span>I joined <a href="https://www.bytedance.com/">ByteDance</a> as a retrieval algorithm researcher on the Douyin Push Team.</li>
+                <li><span class="date">2021 / 04</span>I joined the AI Platform of TEG at <a href="https://www.tencent.com/">Tencent</a> working on video retrieval.</li>
+                <li><span class="date">2019 / 06</span>I obtained my M.S. in computer science at Sun Yat-sen University (HCP Lab).</li>
+            </ul>
+        </section>
 
-<div class="container">
-	<!-- 导航栏 -->
-	<div class="Bar_Div">
-		<ul class="nav nav-tabs" >
-			<li id='nav-bar-1' style="width: 150px; ">&nbsp&nbsp&nbsp&nbsp</li>
-			<li id='nav-bar-1' class="active"><a href="index.html"> Xiaopeng Yan (严肖朋) </a></li>
-			<li id='nav-bar-2' class=""><a href="Publication.html">Publications</a></li>
-			<li id='nav-bar-3' class=""><a href="Project.html">Projects</a></li>
-		</ul>
-	</div>
-	
-	<div class="row clearfix" style=" background-color: white;margin:60px -50px 100px -50px;">
-		<div class="col-md-12 column" style=" background-color: white;padding:50px 100px 50px 50px;">
-			
-			<div class="row clearfix" style="margin-left:20px; margin-bottom:30px; float: left; border: solid 2px #F0F8FF;">
-				
-				<div class="col-md-12 column" style="float: left;">
-					
-					</ul>
-					<ul style="float: left; margin-top:20px;">
-						<li style="list-style-type: none; float: left; margin-left: 5px;">
-						<img src="./imgs/yanxp_pic_1.jpg" 
-						     class="img-rounded" style="width: 230px; height: 180px;">
-						</li>
-						<li style="list-style-type: none; float: left;width:65%;margin-left: 20px;margin-top: 10px;">
-						<p class="Text-context">
-						 Currently, I am a retrieval algorithm researcher in <a href="https://www.bytedance.com/">Bytedance</a> Douyin Push Team.  Before March 2024, I was a video retrieval algorithm researcher at AI Platform of TEG in <a href="https://www.tencent.com/">Tencent</a>. And before April 2021, I worked in EIG research center as a compute vision researcher at <a href="https://www.sensetime.com/">SenseTime</a>. I obtained my M.S. in computer science at <a href="http://www.sysu-hcp.net/home/">Human Cyber Physical Intelligence Integration Lab</a> of <a href="http://www.sysu.edu.cn" > SUN YAT-SEN UNIVERSITY</a>, advised by Prof. <a href="http://www.linliang.net/">Liang Lin</a> and Prof. <a href="http://sdcs.sysu.edu.cn/content/2504">Hui Cheng</a> at June 2019. And I obtained a B.E. in automation at <a href="http://seit.sysu.edu.cn/">School of Electronics and Information Technology</a>.
-						</p>
-						<p class="Text-context">Email:sysuyanxp(at)gmail.com</p>
-						<!-- <p class="Text-context">Email: zhurui10(at)jd.com</p> -->
-						<p class="Text-context">
-						<a href="./files/CV_XiaopengYan.pdf"><span>Download CV Here</span></a>
-						<a href="https://github.com/yanxp"><span style="margin-left: 20px;">Github</span></a>
-						<a href="https://scholar.google.com/citations?user=dwSBmqkAAAAJ&hl=zh-TW"><span style="margin-left: 20px;">Google Scholar</span></a>
-						</p>
-						</li>
-					</ul>
-				</div>
-			</div>
-			
-			<!-- News -->
-			<div class="row clearfix" style="margin-left:20px; margin-bottom:30px;  border: solid 2px #F0F8FF;">
-				<div class="col-md-12 column panel-heading" style="width: 930px;">News</div>
-				
-				<div class="col-md-12 column" style=" border-top:3px solid #AFEEEE;">
-					<ul style="float: left; margin-top:20px;">
+        <!-- ================= Research Interests ================= -->
+        <section class="section" aria-labelledby="interest-title">
+            <h2 class="section-title" id="interest-title">Research Interests</h2>
+            <div class="interests">
+                <div class="interest-card">
+                    <h3><span class="tag"></span>Computer Vision</h3>
+                    <ul>
+                        <li>Object Detection</li>
+                        <li>Video / Face Recognition</li>
+                        <li>Generative Adversarial Networks</li>
+                    </ul>
+                </div>
+                <div class="interest-card">
+                    <h3><span class="tag"></span>Machine Learning</h3>
+                    <ul>
+                        <li>Deep Semi-supervised Learning</li>
+                        <li>Sample Mining</li>
+                        <li>Few-shot Learning</li>
+                    </ul>
+                </div>
+                <div class="interest-card">
+                    <h3><span class="tag"></span>Information Retrieval</h3>
+                    <ul>
+                        <li>Video Retrieval</li>
+                        <li>Recommendation &amp; Push</li>
+                        <li>Representation Learning</li>
+                    </ul>
+                </div>
+                <div class="interest-card">
+                    <h3><span class="tag"></span>Applications</h3>
+                    <ul>
+                        <li>Short-video Understanding</li>
+                        <li>Multi-modal Matching</li>
+                        <li>Large-scale Systems</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
 
-						<li class="li_style"><p class="Text-context" >03/2024: I joined in  <a href="https://www.bytedance.com/"> Bytedance</a>!</li>
+        <!-- ================= Honors ================= -->
+        <section class="section" aria-labelledby="honors-title">
+            <h2 class="section-title" id="honors-title">Selected Honors &amp; Awards</h2>
+            <ul class="awards">
+                <li><span class="year">2018</span>Excellent Graduate Award</li>
+                <li><span class="year">2018</span>Graduate First Class Scholarship</li>
+                <li><span class="year">2018</span>Two National Invention Patents</li>
+                <li><span class="year">2017</span>Excellent Graduation Thesis</li>
+                <li><span class="year">2014 – 2016</span>Excellent Scholarship</li>
+                <li><span class="year">2015</span>First Place, Entrepreneurial Competition</li>
+            </ul>
+        </section>
+    </main>
 
-					</ul>
-					
-				</div>
-			</div>
-			
-			<!-- Research Interest -->
-			<div class="row clearfix" style="margin-left:20px; margin-bottom:30px; border: solid 2px #F0F8FF;">
-				<div class="col-md-12 column panel-heading" style="width: 930px;">Research Interest</div>
-				
-				<div class="col-md-12 column panel-heading" style=" border-top:3px solid #AFEEEE;">
-				
-					<ul>
-					<!-- Computer Vision -->
-						<p class="second-heading" style="margin-left: -15px;">Computer Vision</p>
-						<li class="li_style"><p class="Text-context">Object Detection</p></li>
-						<li class="li_style"><p class="Text-context">Video/Face Recognition</p></li>
-						<li class="li_style"><p class="Text-context">Generative Adversarial Network</p></li>
-					</ul>
-					<!-- Machine Learning -->
-					<ul style="margin-top: -20px;">
-						<p class="second-heading" style="margin-top:35px; margin-left: -15px;">Machine Learning</p>
-						<li class="li_style"><p class="Text-context">Deep Semi-supervised Learning</p></li>
-						<li class="li_style"><p class="Text-context">Sample Mining</p></li>
-						<li class="li_style"><p class="Text-context">Few-shot Learning</p></li>
-					</ul>
-				</div>
-			</div>
-			
-			
-			
-			<!-- Selected Honors & Awards -->
-			<div class="row clearfix" style="margin-left:20px; margin-bottom:30px; border: solid 2px #F0F8FF;">
-				<div class="col-md-12 column panel-heading" style="width: 930px;">Selected Honors & Awards</div>
-				
-				<div class="col-md-12 column" style=" border-top:3px solid #AFEEEE;">
-					<ul style="float: left;margin-top: 10px;">
-			
-						<li class="li_style"><p class="Text-context" >2018 <b>Excellent Graduate Award</b></p></li>
-						<li class="li_style"><p class="Text-context" >2018 <b>Graduate First Class Scholarship</b></p></li>
-						<li class="li_style"><p class="Text-context" >2018 <b>Two National Invention Patents</b></p></li>
-						<li class="li_style"><p class="Text-context" >2017 <b>Excellent Graduation Thesis</b></p></li>
-						<li class="li_style"><p class="Text-context" >2014/2015/2016 <b>Excellent Scholarship</b></p></li>	
-						<li class="li_style"><p class="Text-context" >2015 <b>First Place in Entrepreneurial Competition</b></p></li>	
-
-					</ul>
-				</div>
-			</div>
-			
-		</div>
-	</div>
-</div>
-
+    <footer>
+        © <span id="year">2024</span> Xiaopeng Yan · Built with care · <a href="https://github.com/yanxp/yanxp.github.io">Source</a>
+        <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+    </footer>
 </body>
 </html>
-
