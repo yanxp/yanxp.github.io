@@ -1,272 +1,223 @@
-<script src="http://www.google.com/jsapi" type="text/javascript"></script>
-<script type="text/javascript">google.load("jquery", "1.3.2");</script>
-
-<style type="text/css">
-    body {
-        font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-        font-weight: 300;
-        font-size: 18px;
-        margin-left: auto;
-        margin-right: auto;
-        width: 1100px;
-    }
-
-    h1 {
-        font-weight: 300;
-    }
-
-    .disclaimerbox {
-        background-color: #eee;
-        border: 1px solid #eeeeee;
-        border-radius: 10px;
-        -moz-border-radius: 10px;
-        -webkit-border-radius: 10px;
-        padding: 20px;
-    }
-
-    img.header-img {
-        height: 140px;
-        border: 1px solid black;
-        border-radius: 10px;
-        -moz-border-radius: 10px;
-        -webkit-border-radius: 10px;
-    }
-
-    img.rounded {
-        border: 1px solid #eeeeee;
-        border-radius: 10px;
-        -moz-border-radius: 10px;
-        -webkit-border-radius: 10px;
-    }
-
-    a:link, a:visited {
-        color: #1367a7;
-        text-decoration: none;
-    }
-
-    a:hover {
-        color: #208799;
-    }
-
-    td.dl-link {
-        height: 160px;
-        text-align: center;
-        font-size: 22px;
-    }
-
-    .layered-paper-big { /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
-        box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.35), /* The top layer shadow */ 5px 5px 0 0px #fff, /* The second layer */ 5px 5px 1px 1px rgba(0, 0, 0, 0.35), /* The second layer shadow */ 10px 10px 0 0px #fff, /* The third layer */ 10px 10px 1px 1px rgba(0, 0, 0, 0.35), /* The third layer shadow */ 15px 15px 0 0px #fff, /* The fourth layer */ 15px 15px 1px 1px rgba(0, 0, 0, 0.35), /* The fourth layer shadow */ 20px 20px 0 0px #fff, /* The fifth layer */ 20px 20px 1px 1px rgba(0, 0, 0, 0.35), /* The fifth layer shadow */ 25px 25px 0 0px #fff, /* The fifth layer */ 25px 25px 1px 1px rgba(0, 0, 0, 0.35); /* The fifth layer shadow */
-        margin-left: 10px;
-        margin-right: 45px;
-    }
-
-
-    .layered-paper { /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
-        box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.35), /* The top layer shadow */ 5px 5px 0 0px #fff, /* The second layer */ 5px 5px 1px 1px rgba(0, 0, 0, 0.35), /* The second layer shadow */ 10px 10px 0 0px #fff, /* The third layer */ 10px 10px 1px 1px rgba(0, 0, 0, 0.35); /* The third layer shadow */
-        margin-top: 5px;
-        margin-left: 10px;
-        margin-right: 30px;
-        margin-bottom: 5px;
-    }
-
-    .vert-cent {
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    hr {
-        border: 0;
-        height: 1.5px;
-        background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0));
-    }
-</style>
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Meta R-CNN </title>
-    <meta property="og:title" content="Meta R-CNN"/>
-    <meta property="og:keyword" content="metarcnn, Meat R-CNN"/>
-    <meta property="og:description" content="Meta R-CNN : Towards General Solver for Instance-level Low-shot Learning to appear in ICCV 2019."/>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Meta R-CNN — Xiaopeng Yan</title>
+    <meta name="description" content="Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning (ICCV 2019).">
+    <meta property="og:title" content="Meta R-CNN">
+    <meta property="og:keyword" content="metarcnn, Meta R-CNN">
+    <meta property="og:description" content="Meta R-CNN : Towards General Solver for Instance-level Low-shot Learning, ICCV 2019.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <script src="./assets/js/main.js"></script>
+    <style>
+        .paper-hero {
+            text-align: center;
+            padding: 32px 0 8px;
+        }
+        .paper-title {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+            max-width: 760px;
+            margin: 0 auto 24px;
+        }
+        .paper-authors {
+            color: var(--fg);
+            font-size: 15px;
+            line-height: 1.9;
+            margin-bottom: 6px;
+        }
+        .paper-authors a { color: var(--fg); }
+        .paper-authors a:hover { color: var(--accent); }
+        .paper-affil {
+            color: var(--fg-muted);
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+        .paper-venue {
+            display: inline-block;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            margin-bottom: 22px;
+        }
+        .paper-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 36px;
+        }
+        .paper-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 999px;
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            color: var(--fg);
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+        .paper-links a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .abstract {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--fg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 48px;
+        }
+        .abstract h3 {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--fg-soft);
+            margin: 0 0 12px;
+        }
+        .fig {
+            margin: 40px 0;
+        }
+        .fig img {
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            display: block;
+        }
+        .fig h3 {
+            font-size: 20px;
+            font-weight: 650;
+            margin: 0 0 14px;
+            letter-spacing: -0.01em;
+        }
+        .fig .caption {
+            margin-top: 14px;
+            color: var(--fg-muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+    </style>
 </head>
-
 <body>
-<br>
-<center>
-    <span style="font-size:42px">Meta R-CNN : Towards General Solver for Instance-level Low-shot Learning</span>
-</center>
+    <nav class="nav" aria-label="Primary">
+        <div class="nav-inner">
+            <a class="nav-brand" href="./index.html">
+                <span class="dot" aria-hidden="true"></span>
+                <span>Xiaopeng Yan · 严肖朋</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="./index.html">Home</a></li>
+                <li><a href="./Publication.html">Publications</a></li>
+                <li><a href="./Project.html">Projects</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle theme">
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
 
-<br>    
-<table align=center width=1000px>
-    <tr>
-       <td align=center width=80px>
-            <center>
-                <span style="font-size:20px"><a href="https://yanxp.github.io/">Xiaopeng Yan<sup>1*</sup></a></span>
-            </center>
-        </td>
-        <td align=center width=80px>
-            <center>
-                <span style="font-size:20px">
-                <a href="https://cziliang.com">Ziliang Chen<sup>1*</sup></span>
-            </center>
-        </td>
-        <td align=center width=60px>
-            <center>
-                <span style="font-size:20px">Anni Xu<sup>1</sup></span>
-            </center>
-        </td>
-                <td align=center width=80px>
-            <center>
-                <span style="font-size:20px">Xiaoxi Wang<sup>1</sup></span>
-            </center>
-        </td>
-        <td align=center width=90px>
-            <center>
-                <span style="font-size:20px">
-                <a href="https://lemondan.github.io/">Xiaodan Liang<sup>1,2</sup></span>
-            </center>
-        </td>
-        <td align=center width=80px>
-            <center>
-                <span style="font-size:20px"><a href="http://www.linliang.net/">Liang Lin<sup>1,2</sup></a></span>
-            </center>
-        </td>
-    </tr>
-</table>
-<table align=center width=700px>
-    <tr>
-        <td align=center width=100px>
-            <center>
-                <span style="font-size:20px"><sup>1</sup>Sun Yat-sen University</span>
-            </center>
-        </td>
-        <td align=center width=100px>
-            <center>
-                <span style="font-size:20px"><sup>2</sup>DarkMatter AI Research</span>
-            </center>
-        </td>
-    </tr>
-</table>
+    <main>
+        <header class="paper-hero">
+            <h1 class="paper-title">Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning</h1>
+            <p class="paper-authors">
+                <a href="https://yanxp.github.io/">Xiaopeng Yan</a><sup>1*</sup> ·
+                <a href="https://cziliang.com">Ziliang Chen</a><sup>1*</sup> ·
+                Anni Xu<sup>1</sup> ·
+                Xiaoxi Wang<sup>1</sup> ·
+                <a href="https://lemondan.github.io/">Xiaodan Liang</a><sup>1,2</sup> ·
+                <a href="http://www.linliang.net/">Liang Lin</a><sup>1,2</sup>
+            </p>
+            <p class="paper-affil"><sup>1</sup>Sun Yat-sen University &nbsp;·&nbsp; <sup>2</sup>DarkMatter AI Research</p>
+            <span class="paper-venue">ICCV 2019</span>
+            <div class="paper-links">
+                <a href="https://arxiv.org/pdf/1909.13032.pdf">PDF</a>
+                <a href="https://github.com/yanxp/MetaR-CNN">Code</a>
+                <a href="./resources/images/metarcnn.bib">BibTeX</a>
+                <a href="./files/metarcnn-supp.pdf">Supplementary</a>
+            </div>
+        </header>
 
-<br>
-<table align=center width=700px>
-    <tr>
-        <td align=center width=100px>
-            <center>
-                <span style="font-size:20px">In ICCV 2019</span>
-            </center>
-        </td>
-    </tr>
-</table>
-<table align=center width=300px>
-    <tr>
-        <td align=center width=100px>
-            <center>
-                <span style="font-size:20px"><a href="https://arxiv.org/pdf/1909.13032.pdf">[pdf]</a></span>
-            </center>
-        </td>
-        <td align=center width=100px>
-            <center>
-                <span style="font-size:20px"><a href="https://github.com/yanxp/MetaR-CNN">[code]</a></span>
-            </center>
-        </td>
+        <section class="abstract">
+            <h3>Abstract</h3>
+            <p>
+                Resembling the rapid learning capability of humans, low-shot learning empowers vision systems
+                to understand new concepts by training with few samples. Leading approaches derived from
+                meta-learning on images with a single visual object. Obfuscated by a complex background and
+                multiple objects in one image, they are hard to promote the research of low-shot object
+                detection/segmentation. In this work, we present a flexible and general methodology to
+                achieve these tasks.
+            </p>
+        </section>
 
-        <td align=center width=100px>
-            <center>
-                <span style="font-size:20px"><a href="https://yanxp.github.io/resources/images/metarcnn.bib">[bibtex]</a></span>
-            </center>
-        </td>
+        <section class="fig">
+            <h3>Meta R-CNN</h3>
+            <a href="./resources/images/mrcnn.png"><img src="./resources/images/mrcnn.png" alt="Meta R-CNN architecture diagram"></a>
+            <p class="caption">
+                Our Meta R-CNN consists of 1) Faster/Mask R-CNN; 2) Predictor-head Remodeling Network (PRN).
+                Faster/Mask R-CNN receives an image to produce RoI features by taking RoIAlign on the image
+                region proposals extracted by RPN. In parallel, our PRN receives K-shot m-class resized
+                images with their structure labels (bounding boxes / segmentation masks) to infer m
+                class-attentive vectors. Given a class-attentive vector representing class c, it takes a
+                channel-wise soft-attention on each RoI feature, encouraging the Faster/Mask R-CNN predictor
+                heads to detect or segment class-c objects based on the RoI features in the image. As the
+                class c is dynamically determined by the inputs of PRN, Meta R-CNN is a meta-learner.
+            </p>
+        </section>
 
-        <td align=center width=100px>
-            <center>
-                <span style="font-size:20px"><a href="./files/metarcnn-supp.pdf">[supp]</a></span>
-            </center>
-        </td>
+        <section class="fig">
+            <h3>Low-shot Object Detection</h3>
+            <a href="./resources/images/detection.png"><img src="./resources/images/detection.png" alt="Low-shot object detection results"></a>
+            <p class="caption">
+                AP and mAP on VOC2007 test set for novel classes and base classes of the first base/novel
+                split. We evaluate the performance for 3/10-shot novel-class examples with FRCN under
+                ResNet-101. RED / BLUE indicate the SOTA / second-best (best viewed in color).
+            </p>
+        </section>
 
-    </tr>
-</table>
-<table align=center width=700px>
-    <tr>
-        <td align=center width=100px>
-            <center>
-                <span style="font-size:20px"></span>
-            </center>
-        </td>
-    </tr>
-</table>
-<span style="font-size:20px;font-family:Arial">
-Resembling the rapid learning capability of human, lowshot learning empowers vision systems to understand new concepts by training with few samples. Leading approaches derived from meta-learning on images with a single visual object. Obfuscated by a complex background and multiple objects in one image, they are hard to promote the research
-of low-shot object detection/segmentation. In this work, we
-present a flexible and general methodology to achieve these
-tasks.
-</span>
-<br>
-<hr>
-<table align=center width=1000px>
-    <center><h2>Meta R-CNN</h2></center>
-    <table align=center width=900px>
-        <tr>
-            <td width=00px>
-                <center>
-                    <a href="./resources/images/mrcnn.png"><img src="./resources/images/mrcnn.png"
-                     width="900px"></img></href></a><br>
-                </center>
-            </td>
-        </tr>
-        <tr>
-            <td width=600px>
-                <center>
-            <span style="font-size:14px"><i>Our Meta R-CNN consists of 1) Faster/MaskR-CNN;2)Predictor-head Remodeling Network (PRN). Faster/ Mask RCNN (module) receives an image to produce RoI features, by taking RoIAlign on the image region proposals extracted by RPN.In parallel,our PRN receives K-shot m-class resized images with their structure labels (bounding boxes/segmentaion masks) to infer m class-attentive vectors. Given a class attentive vector representing class c,it takes a channel-wise soft-attention on each RoI feature,encouraging the Faster/ Mask R-CNN predictor heads to detect or segment class-c objects based on the RoI features in the image. As the class c is dynamically determined by the inputs of PRN, Meta R-CNN is a meta-learner.</i>
-                </center>
-            </td>
-        </tr>
-    </table>
-    <hr>
+        <section class="fig">
+            <h3>Low-shot Object Segmentation</h3>
+            <a href="./resources/images/segmentation.png"><img src="./resources/images/segmentation.png" alt="Low-shot object segmentation results"></a>
+            <p class="caption">
+                Low-shot detection and instance-segmentation performance on COCO minival set for novel
+                classes under Mask R-CNN with ResNet-50. The evaluation is based on 5/10/20-shot objects
+                in novel classes.
+            </p>
+        </section>
+    </main>
 
-    <center><h2>Low-shot Object Detection</h2></center>
-    <table align=center width=900px>
-        <tr>
-            <td width=00px>
-                <center>
-                    <a href="./resources/images/detection.png"><img src="./resources/images/detection.png"
-                    width="900px"></img></href></a><br>
-                </center>
-            </td>
-        </tr>
-
-        <tr>
-            <td width=600px>
-                <center>
-            <span style="font-size:14px"><i>AP and mAP on VOC2007 test set for novel classes and base classes of the first base/novel split. We evaluate the performance for 3/10-shot novel-class examples with FRCN under ResNet-101. RED/BLUE indicate the SOTA/the second best. (Best viewd in color)</i>
-                </center>
-            </td>
-        </tr>
-    </table>
-    <br>
-
-    <hr>
-    <center><h2>Low-shot Object Segmentation</h2></center>
-    <table align=center width=900px>
-        <tr>
-            <td width=00px>
-                <center>
-                    <a href="./resources/images/segmentation.png"><img src="./resources/images/segmentation.png"
-                width="900px"></img></href></a><br>
-                </center>
-            </td>
-        </tr>
-        <tr>
-            <td width=600px>
-                <center>
-            <span style="font-size:14px"><i>Low-shot detection and instance segmentation performance on COCO minival set for novel classes under Mask R-CNN with
-ResNet-50. The evaluation based on 5/10/20-shot-object in novel classes.</i>
-                </center>
-            </td>
-        </tr>
-    </table>
-
-    <br>
-    <br>
+    <footer>
+        © <span id="year">2024</span> Xiaopeng Yan · Built with care · <a href="https://github.com/yanxp/yanxp.github.io">Source</a>
+        <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+    </footer>
 </body>
 </html>
-
