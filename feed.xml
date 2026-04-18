@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Xiaopeng Yan — News</title>
+    <link>https://yanxp.github.io/</link>
+    <atom:link href="https://yanxp.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>News and updates from Xiaopeng Yan's homepage.</description>
+    <language>en-us</language>
+
+    <item>
+      <title>Joined ByteDance Douyin Push Team</title>
+      <link>https://yanxp.github.io/#news</link>
+      <guid isPermaLink="false">news-2024-03-bytedance</guid>
+      <pubDate>Fri, 01 Mar 2024 00:00:00 +0000</pubDate>
+      <description>I joined ByteDance as a retrieval algorithm researcher on the Douyin Push Team.</description>
+    </item>
+    <item>
+      <title>Joined Tencent TEG AI Platform</title>
+      <link>https://yanxp.github.io/#news</link>
+      <guid isPermaLink="false">news-2021-04-tencent</guid>
+      <pubDate>Thu, 01 Apr 2021 00:00:00 +0000</pubDate>
+      <description>I joined the AI Platform of TEG at Tencent working on video retrieval.</description>
+    </item>
+    <item>
+      <title>M.S. in Computer Science at Sun Yat-sen University</title>
+      <link>https://yanxp.github.io/#news</link>
+      <guid isPermaLink="false">news-2019-06-msc</guid>
+      <pubDate>Sat, 01 Jun 2019 00:00:00 +0000</pubDate>
+      <description>Obtained my M.S. in computer science at Sun Yat-sen University (HCP Lab).</description>
+    </item>
+  </channel>
+</rss>

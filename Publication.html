@@ -4,9 +4,28 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <title>Publications — Xiaopeng Yan (严肖朋)</title>
-    <meta name="description" content="Publications of Xiaopeng Yan.">
-    <meta name="keyword" content="严肖朋,Xiaopeng Yan,yanxp,publications">
+    <meta name="description" content="Publications of Xiaopeng Yan — computer vision, low-shot learning, retrieval.">
+    <meta name="keywords" content="严肖朋, Xiaopeng Yan, yanxp, publications, papers">
+    <link rel="canonical" href="https://yanxp.github.io/Publication.html">
+    <link rel="alternate" type="application/rss+xml" title="Xiaopeng Yan — News" href="https://yanxp.github.io/feed.xml">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Xiaopeng Yan">
+    <meta property="og:title" content="Publications — Xiaopeng Yan">
+    <meta property="og:description" content="Publications of Xiaopeng Yan — computer vision, low-shot learning, retrieval.">
+    <meta property="og:url" content="https://yanxp.github.io/Publication.html">
+    <meta property="og:image" content="https://yanxp.github.io/imgs/yanxp_pic_1.jpg">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Publications — Xiaopeng Yan">
+    <meta name="twitter:description" content="Publications of Xiaopeng Yan.">
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.svg">
+    <meta name="theme-color" content="#2d63e4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +34,8 @@
     <script src="./assets/js/main.js"></script>
 </head>
 <body>
+    <a class="skip-link" href="#main"><span data-lang-en>Skip to content</span><span data-lang-zh>跳到正文</span></a>
+
     <nav class="nav" aria-label="Primary">
         <div class="nav-inner">
             <a class="nav-brand" href="./index.html">
@@ -22,27 +43,41 @@
                 <span>Xiaopeng Yan · 严肖朋</span>
             </a>
             <ul class="nav-links">
-                <li><a href="./index.html">Home</a></li>
-                <li><a href="./Publication.html" class="active">Publications</a></li>
-                <li><a href="./Project.html">Projects</a></li>
+                <li><a href="./index.html"><span data-lang-en>Home</span><span data-lang-zh>首页</span></a></li>
+                <li><a href="./Publication.html" class="active"><span data-lang-en>Publications</span><span data-lang-zh>论文</span></a></li>
+                <li><a href="./Project.html"><span data-lang-en>Projects</span><span data-lang-zh>项目</span></a></li>
             </ul>
             <div class="nav-right">
-                <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle theme">
-                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <button class="lang-toggle" type="button" aria-label="Switch language" title="Language">中文</button>
+                <button class="theme-toggle" type="button" aria-label="Toggle color theme" aria-pressed="false" title="Toggle theme">
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
                 </button>
             </div>
         </div>
     </nav>
 
-    <main>
+    <main id="main">
         <section class="section">
-            <h2 class="section-title">Publications</h2>
+            <h2 class="section-title">
+                <span data-lang-en>Publications</span><span data-lang-zh>论文</span>
+            </h2>
 
-            <h3 class="pub-subhead">Journal <span class="count">1</span></h3>
+            <!-- Filter -->
+            <div class="pub-filter" role="group" aria-label="Filter publications">
+                <span class="pub-filter-label"><span data-lang-en>Filter</span><span data-lang-zh>筛选</span></span>
+                <div class="pub-filter-group">
+                    <button type="button" class="pub-filter-btn" data-pub-filter="all" aria-pressed="true"><span data-lang-en>All</span><span data-lang-zh>全部</span></button>
+                    <button type="button" class="pub-filter-btn" data-pub-filter="journal" aria-pressed="false"><span data-lang-en>Journal</span><span data-lang-zh>期刊</span></button>
+                    <button type="button" class="pub-filter-btn" data-pub-filter="conference" aria-pressed="false"><span data-lang-en>Conference</span><span data-lang-zh>会议</span></button>
+                    <button type="button" class="pub-filter-btn" data-pub-filter="preprint" aria-pressed="false"><span data-lang-en>Preprint</span><span data-lang-zh>预印本</span></button>
+                </div>
+            </div>
+
+            <h3 class="pub-subhead"><span data-lang-en>Journal</span><span data-lang-zh>期刊</span> <span class="count">1</span></h3>
             <ul class="pub-list">
-                <li class="pub">
-                    <img class="pub-img" src="./imgs/asm.png" alt="ASM thumbnail">
+                <li class="pub" data-type="journal">
+                    <img class="pub-img" src="./imgs/asm.png" alt="ASM thumbnail" width="160" height="100" loading="lazy" decoding="async">
                     <div class="pub-body">
                         <h4 class="pub-title">Cost-Effective Object Detection: Active Sample Mining with Switchable Selection Criteria</h4>
                         <p class="pub-authors">Keze Wang, Liang Lin, <span class="me">Xiaopeng Yan</span>, Ziliang Chen, Dongyu Zhang, Lei Zhang.</p>
@@ -52,60 +87,98 @@
                             <a href="https://arxiv.org/pdf/1807.00147.pdf">PDF</a>
                             <a href="https://github.com/yanxp/ASM">Code</a>
                             <a href="https://github.com/yanxp/ASM-Pytorch">PyTorch</a>
+                            <button type="button" class="bibtex-btn" data-bibtex="bib-asm">BibTeX</button>
                         </div>
+                        <template id="bib-asm">@article{wang2018costeffective,
+  title={Cost-Effective Object Detection: Active Sample Mining with Switchable Selection Criteria},
+  author={Wang, Keze and Lin, Liang and Yan, Xiaopeng and Chen, Ziliang and Zhang, Dongyu and Zhang, Lei},
+  journal={IEEE Transactions on Neural Networks and Learning Systems},
+  year={2018}
+}</template>
                     </div>
                 </li>
             </ul>
 
-            <h3 class="pub-subhead">Conference <span class="count">6</span></h3>
+            <h3 class="pub-subhead"><span data-lang-en>Conference</span><span data-lang-zh>会议</span> <span class="count">6</span></h3>
             <ul class="pub-list">
-                <li class="pub">
-                    <img class="pub-img" src="./imgs/scood.png" alt="SC-OOD thumbnail">
+                <li class="pub" data-type="conference">
+                    <img class="pub-img" src="./imgs/scood.png" alt="SC-OOD thumbnail" width="160" height="100" loading="lazy" decoding="async">
                     <div class="pub-body">
                         <h4 class="pub-title">Semantically Coherent Out-of-Distribution Detection</h4>
                         <p class="pub-authors">Jingkang Yang, Haoqi Wang, Litong Feng, <span class="me">Xiaopeng Yan</span>, Huabin Zheng, Wayne Zhang, Ziwei Liu.</p>
                         <p class="pub-venue"><span class="badge">ICCV</span> IEEE International Conference on Computer Vision, 2021.</p>
+                        <div class="pub-links">
+                            <button type="button" class="bibtex-btn" data-bibtex="bib-scood">BibTeX</button>
+                        </div>
+                        <template id="bib-scood">@inproceedings{yang2021scood,
+  title={Semantically Coherent Out-of-Distribution Detection},
+  author={Yang, Jingkang and Wang, Haoqi and Feng, Litong and Yan, Xiaopeng and Zheng, Huabin and Zhang, Wayne and Liu, Ziwei},
+  booktitle={ICCV},
+  year={2021}
+}</template>
                     </div>
                 </li>
 
-                <li class="pub">
-                    <img class="pub-img" src="./imgs/acmmm.png" alt="ACM-MM thumbnail">
+                <li class="pub" data-type="conference">
+                    <img class="pub-img" src="./imgs/acmmm.png" alt="ACM-MM thumbnail" width="160" height="100" loading="lazy" decoding="async">
                     <div class="pub-body">
                         <h4 class="pub-title">Learning Image Classifier from Only Web Labels and Metadata: Automatic Label Correction through Graph</h4>
                         <p class="pub-authors">Jingkang Yang, Weirong Chen, Litong Feng, <span class="me">Xiaopeng Yan</span>, Huabin Zheng, Wayne Zhang.</p>
                         <p class="pub-venue"><span class="badge">ACM-MM Oral</span> ACM International Conference on Multimedia, 2020.</p>
                         <div class="pub-links">
                             <a href="https://dl.acm.org/doi/pdf/10.1145/3394171.3413952">PDF</a>
+                            <button type="button" class="bibtex-btn" data-bibtex="bib-acmmm">BibTeX</button>
                         </div>
+                        <template id="bib-acmmm">@inproceedings{yang2020webly,
+  title={Learning Image Classifier from Only Web Labels and Metadata: Automatic Label Correction through Graph},
+  author={Yang, Jingkang and Chen, Weirong and Feng, Litong and Yan, Xiaopeng and Zheng, Huabin and Zhang, Wayne},
+  booktitle={ACM MM},
+  year={2020}
+}</template>
                     </div>
                 </li>
 
-                <li class="pub">
-                    <img class="pub-img" src="./imgs/scc.png" alt="SCC thumbnail">
+                <li class="pub" data-type="conference">
+                    <img class="pub-img" src="./imgs/scc.png" alt="SCC thumbnail" width="160" height="100" loading="lazy" decoding="async">
                     <div class="pub-body">
                         <h4 class="pub-title">Webly Supervised Image Classification with Self-Contained Confidence</h4>
                         <p class="pub-authors">Jingkang Yang, Litong Feng, Weirong Chen, <span class="me">Xiaopeng Yan</span>, Huabin Zheng, Luo Ping, Wayne Zhang.</p>
                         <p class="pub-venue"><span class="badge">ECCV</span> IEEE European Conference on Computer Vision, 2020.</p>
                         <div class="pub-links">
                             <a href="https://arxiv.org/pdf/2008.11894.pdf">PDF</a>
+                            <button type="button" class="bibtex-btn" data-bibtex="bib-scc">BibTeX</button>
                         </div>
+                        <template id="bib-scc">@inproceedings{yang2020scc,
+  title={Webly Supervised Image Classification with Self-Contained Confidence},
+  author={Yang, Jingkang and Feng, Litong and Chen, Weirong and Yan, Xiaopeng and Zheng, Huabin and Ping, Luo and Zhang, Wayne},
+  booktitle={ECCV},
+  year={2020}
+}</template>
                     </div>
                 </li>
 
-                <li class="pub">
-                    <img class="pub-img" src="./imgs/metarcnn.png" alt="Meta R-CNN thumbnail">
+                <li class="pub" data-type="conference">
+                    <img class="pub-img" src="./imgs/metarcnn.png" alt="Meta R-CNN thumbnail" width="160" height="100" loading="lazy" decoding="async">
                     <div class="pub-body">
                         <h4 class="pub-title">Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning</h4>
                         <p class="pub-authors"><span class="me">Xiaopeng Yan</span>*, Ziliang Chen*, Anni Xu, Xiaoxi Wang, Xiaodan Liang, Liang Lin.</p>
                         <p class="pub-venue"><span class="badge">ICCV</span> IEEE International Conference on Computer Vision, 2019.</p>
                         <div class="pub-links">
                             <a href="./metarcnn.html">Project</a>
+                            <a href="./resources/images/metarcnn.bib">BibTeX file</a>
+                            <button type="button" class="bibtex-btn" data-bibtex="bib-metarcnn">Copy</button>
                         </div>
+                        <template id="bib-metarcnn">@inproceedings{yan2019metarcnn,
+  title={Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning},
+  author={Yan, Xiaopeng and Chen, Ziliang and Xu, Anni and Wang, Xiaoxi and Liang, Xiaodan and Lin, Liang},
+  booktitle={ICCV},
+  year={2019}
+}</template>
                     </div>
                 </li>
 
-                <li class="pub">
-                    <img class="pub-img" src="./imgs/mali.png" alt="MMI-ALI thumbnail">
+                <li class="pub" data-type="conference">
+                    <img class="pub-img" src="./imgs/mali.png" alt="MMI-ALI thumbnail" width="160" height="100" loading="lazy" decoding="async">
                     <div class="pub-body">
                         <h4 class="pub-title">Multivariate-Information Adversarial Ensemble for Scalable Joint Distribution Matching</h4>
                         <p class="pub-authors">Ziliang Chen, Zhanfu Yang, Xiaoxi Wang, Xiaodan Liang, <span class="me">Xiaopeng Yan</span>, Guanbin Li, Liang Lin.</p>
@@ -113,12 +186,19 @@
                         <div class="pub-links">
                             <a href="./files/mmiali.pdf">PDF</a>
                             <a href="https://github.com/MintYiqingchen/MMI-ALI">Code</a>
+                            <button type="button" class="bibtex-btn" data-bibtex="bib-mmiali">BibTeX</button>
                         </div>
+                        <template id="bib-mmiali">@inproceedings{chen2019mmiali,
+  title={Multivariate-Information Adversarial Ensemble for Scalable Joint Distribution Matching},
+  author={Chen, Ziliang and Yang, Zhanfu and Wang, Xiaoxi and Liang, Xiaodan and Yan, Xiaopeng and Li, Guanbin and Lin, Liang},
+  booktitle={ICML},
+  year={2019}
+}</template>
                     </div>
                 </li>
 
-                <li class="pub">
-                    <img class="pub-img" src="./imgs/cvpr.png" alt="SSM thumbnail">
+                <li class="pub" data-type="conference">
+                    <img class="pub-img" src="./imgs/cvpr.png" alt="SSM thumbnail" width="160" height="100" loading="lazy" decoding="async">
                     <div class="pub-body">
                         <h4 class="pub-title">Towards Human-Machine Cooperation: Self-supervised Sample Mining for Object Detection</h4>
                         <p class="pub-authors">Keze Wang, <span class="me">Xiaopeng Yan</span>, Dongyu Zhang, Lei Zhang, Liang Lin.</p>
@@ -128,22 +208,36 @@
                             <a href="https://arxiv.org/pdf/1803.09867.pdf">PDF</a>
                             <a href="https://github.com/yanxp/SSM">Code</a>
                             <a href="https://github.com/yanxp/SSM-Pytorch">PyTorch</a>
+                            <button type="button" class="bibtex-btn" data-bibtex="bib-ssm">BibTeX</button>
                         </div>
+                        <template id="bib-ssm">@inproceedings{wang2018ssm,
+  title={Towards Human-Machine Cooperation: Self-supervised Sample Mining for Object Detection},
+  author={Wang, Keze and Yan, Xiaopeng and Zhang, Dongyu and Zhang, Lei and Lin, Liang},
+  booktitle={CVPR},
+  year={2018}
+}</template>
                     </div>
                 </li>
             </ul>
 
-            <h3 class="pub-subhead">Preprints <span class="count">1</span></h3>
+            <h3 class="pub-subhead"><span data-lang-en>Preprints</span><span data-lang-zh>预印本</span> <span class="count">1</span></h3>
             <ul class="pub-list">
-                <li class="pub">
-                    <img class="pub-img" src="./imgs/prl.png" alt="PRL thumbnail">
+                <li class="pub" data-type="preprint">
+                    <img class="pub-img" src="./imgs/prl.png" alt="PRL thumbnail" width="160" height="100" loading="lazy" decoding="async">
                     <div class="pub-body">
                         <h4 class="pub-title">Progressive Representative Labeling for Deep Semi-Supervised Learning</h4>
                         <p class="pub-authors"><span class="me">Xiaopeng Yan</span>, Riquan Chen, Litong Feng, Jingkang Yang, Huabin Zheng, Wayne Zhang.</p>
                         <p class="pub-venue">arXiv preprint</p>
                         <div class="pub-links">
                             <a href="https://arxiv.org/pdf/2108.06070.pdf">PDF</a>
+                            <button type="button" class="bibtex-btn" data-bibtex="bib-prl">BibTeX</button>
                         </div>
+                        <template id="bib-prl">@article{yan2021prl,
+  title={Progressive Representative Labeling for Deep Semi-Supervised Learning},
+  author={Yan, Xiaopeng and Chen, Riquan and Feng, Litong and Yang, Jingkang and Zheng, Huabin and Zhang, Wayne},
+  journal={arXiv preprint arXiv:2108.06070},
+  year={2021}
+}</template>
                     </div>
                 </li>
             </ul>
@@ -151,8 +245,9 @@
     </main>
 
     <footer>
-        © <span id="year">2024</span> Xiaopeng Yan · Built with care · <a href="https://github.com/yanxp/yanxp.github.io">Source</a>
-        <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+        © <span id="year">2024</span> Xiaopeng Yan · Built with care ·
+        <a href="https://github.com/yanxp/yanxp.github.io">Source</a> ·
+        <a href="./feed.xml">RSS</a>
     </footer>
 </body>
 </html>

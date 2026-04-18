@@ -6,9 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Meta R-CNN — Xiaopeng Yan</title>
     <meta name="description" content="Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning (ICCV 2019).">
-    <meta property="og:title" content="Meta R-CNN">
-    <meta property="og:keyword" content="metarcnn, Meta R-CNN">
-    <meta property="og:description" content="Meta R-CNN : Towards General Solver for Instance-level Low-shot Learning, ICCV 2019.">
+    <meta name="keywords" content="Meta R-CNN, metarcnn, ICCV 2019, low-shot learning, object detection, Xiaopeng Yan">
+    <meta name="author" content="Xiaopeng Yan">
+    <link rel="canonical" href="https://yanxp.github.io/metarcnn.html">
+
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Xiaopeng Yan">
+    <meta property="og:title" content="Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning">
+    <meta property="og:description" content="Meta R-CNN: ICCV 2019 paper on low-shot object detection and segmentation.">
+    <meta property="og:url" content="https://yanxp.github.io/metarcnn.html">
+    <meta property="og:image" content="https://yanxp.github.io/resources/images/mrcnn.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Meta R-CNN — ICCV 2019">
+    <meta name="twitter:description" content="Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning.">
+    <meta name="twitter:image" content="https://yanxp.github.io/resources/images/mrcnn.png">
+
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.svg">
+    <meta name="theme-color" content="#2d63e4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ScholarlyArticle",
+        "headline": "Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning",
+        "author": [
+            {"@type": "Person", "name": "Xiaopeng Yan"},
+            {"@type": "Person", "name": "Ziliang Chen"},
+            {"@type": "Person", "name": "Anni Xu"},
+            {"@type": "Person", "name": "Xiaoxi Wang"},
+            {"@type": "Person", "name": "Xiaodan Liang"},
+            {"@type": "Person", "name": "Liang Lin"}
+        ],
+        "datePublished": "2019",
+        "publisher": "ICCV",
+        "url": "https://yanxp.github.io/metarcnn.html",
+        "sameAs": "https://arxiv.org/abs/1909.13032"
+    }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -126,6 +163,8 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
     <nav class="nav" aria-label="Primary">
         <div class="nav-inner">
             <a class="nav-brand" href="./index.html">
@@ -138,15 +177,15 @@
                 <li><a href="./Project.html">Projects</a></li>
             </ul>
             <div class="nav-right">
-                <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle theme">
-                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <button class="theme-toggle" type="button" aria-label="Toggle color theme" aria-pressed="false" title="Toggle theme">
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
                 </button>
             </div>
         </div>
     </nav>
 
-    <main>
+    <main id="main">
         <header class="paper-hero">
             <h1 class="paper-title">Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning</h1>
             <p class="paper-authors">
@@ -181,7 +220,7 @@
 
         <section class="fig">
             <h3>Meta R-CNN</h3>
-            <a href="./resources/images/mrcnn.png"><img src="./resources/images/mrcnn.png" alt="Meta R-CNN architecture diagram"></a>
+            <a href="./resources/images/mrcnn.png"><img src="./resources/images/mrcnn.png" alt="Meta R-CNN architecture diagram" loading="lazy" decoding="async"></a>
             <p class="caption">
                 Our Meta R-CNN consists of 1) Faster/Mask R-CNN; 2) Predictor-head Remodeling Network (PRN).
                 Faster/Mask R-CNN receives an image to produce RoI features by taking RoIAlign on the image
@@ -196,7 +235,7 @@
 
         <section class="fig">
             <h3>Low-shot Object Detection</h3>
-            <a href="./resources/images/detection.png"><img src="./resources/images/detection.png" alt="Low-shot object detection results"></a>
+            <a href="./resources/images/detection.png"><img src="./resources/images/detection.png" alt="Low-shot object detection results" loading="lazy" decoding="async"></a>
             <p class="caption">
                 AP and mAP on VOC2007 test set for novel classes and base classes of the first base/novel
                 split. We evaluate the performance for 3/10-shot novel-class examples with FRCN under
@@ -206,7 +245,7 @@
 
         <section class="fig">
             <h3>Low-shot Object Segmentation</h3>
-            <a href="./resources/images/segmentation.png"><img src="./resources/images/segmentation.png" alt="Low-shot object segmentation results"></a>
+            <a href="./resources/images/segmentation.png"><img src="./resources/images/segmentation.png" alt="Low-shot object segmentation results" loading="lazy" decoding="async"></a>
             <p class="caption">
                 Low-shot detection and instance-segmentation performance on COCO minival set for novel
                 classes under Mask R-CNN with ResNet-50. The evaluation is based on 5/10/20-shot objects
@@ -216,8 +255,9 @@
     </main>
 
     <footer>
-        © <span id="year">2024</span> Xiaopeng Yan · Built with care · <a href="https://github.com/yanxp/yanxp.github.io">Source</a>
-        <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+        © <span id="year">2024</span> Xiaopeng Yan · Built with care ·
+        <a href="https://github.com/yanxp/yanxp.github.io">Source</a> ·
+        <a href="./feed.xml">RSS</a>
     </footer>
 </body>
 </html>
