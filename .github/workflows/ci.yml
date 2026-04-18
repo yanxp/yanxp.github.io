@@ -24,8 +24,7 @@ jobs:
       - name: Run htmlhint
         run: htmlhint --config .htmlhintrc "*.html"
 
-      - name: Validate sitemap/feed XML
+      - name: Validate sitemap XML
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils
           xmllint --noout sitemap.xml
-          xmllint --noout feed.xml

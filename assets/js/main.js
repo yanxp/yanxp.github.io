@@ -90,7 +90,35 @@
 
         /* BibTeX copy buttons */
         initBibtexButtons();
+
+        /* Scholar stats badge */
+        initScholarBadge();
     });
+
+    /* -------- Scholar badge -------- */
+    function initScholarBadge() {
+        var badge = document.querySelector('[data-scholar-badge]');
+        if (!badge) return;
+        var target = badge.querySelector('[data-scholar="citations"]');
+        if (!target) return;
+        var url = badge.getAttribute('data-scholar-url') || './assets/data/scholar.json';
+        fetch(url, { cache: 'no-cache' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data || typeof data.citations !== 'number' || data.citations <= 0) return;
+                target.textContent = String(data.citations);
+                if (data.h_index) {
+                    badge.setAttribute(
+                        'title',
+                        'Citations: ' + data.citations +
+                        ' · h-index: ' + data.h_index +
+                        (data.i10_index ? ' · i10: ' + data.i10_index : '')
+                    );
+                }
+                badge.removeAttribute('hidden');
+            })
+            .catch(function () { /* keep hidden on failure */ });
+    }
 
     /* -------- Publication filter -------- */
     function initPubFilter() {
