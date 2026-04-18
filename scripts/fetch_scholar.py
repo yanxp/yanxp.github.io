@@ -46,13 +46,21 @@ def parse_stats(payload: dict) -> dict[str, int]:
 
     cited_by = payload.get("cited_by") or {}
     table = cited_by.get("table") or []
+    if not isinstance(table, list):
+        raise RuntimeError(
+            f"SerpAPI response cited_by.table is {type(table).__name__}, expected list"
+        )
 
     def pick(key: str) -> int:
         for row in table:
-            if key in row:
-                value = row[key].get("all")
-                if isinstance(value, int):
-                    return value
+            if not isinstance(row, dict) or key not in row:
+                continue
+            cell = row[key]
+            if not isinstance(cell, dict):
+                continue
+            value = cell.get("all")
+            if isinstance(value, int):
+                return value
         raise RuntimeError(f"SerpAPI response missing cited_by.table[*].{key}.all")
 
     return {
