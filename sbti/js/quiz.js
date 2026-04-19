@@ -139,10 +139,10 @@ function showLoading() {
   ];
 
   const interval = setInterval(() => {
-    step++;
     if (step < messages.length) {
       sub.textContent = messages[step];
       emojiEl.textContent = emojis[step % emojis.length];
+      step++;
     }
   }, 400);
 
