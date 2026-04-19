@@ -3,7 +3,7 @@
  * 5大模型 × 3个维度 × 2题/维度
  */
 
-const QUESTIONS = [
+var QUESTIONS = [
   // ============ 表达模型 ============
   { model: '🗣️ 表达模型', dimension: 'expressionStyle', text: '朋友发了一条明显在凡尔赛的朋友圈，你会？', options: [
     { text: '默默滑过，当没看见', score: 1 },
@@ -195,4 +195,4 @@ const QUESTIONS = [
   ]}
 ]
 
-module.exports = { QUESTIONS }
+module.exports = { QUESTIONS: QUESTIONS }

@@ -2,27 +2,29 @@
  * 互联网嘴替测试 — 评分引擎
  */
 
-const { DIMENSION_KEYS, SBTI_TYPES } = require('./types')
+var typesModule = require('./types')
+var DIMENSION_KEYS = typesModule.DIMENSION_KEYS
+var SBTI_TYPES = typesModule.SBTI_TYPES
 
 function calculateResult(dimensionScores) {
-  const levels = {}
-  DIMENSION_KEYS.forEach(k => {
-    const s = dimensionScores[k] || 4
+  var levels = {}
+  DIMENSION_KEYS.forEach(function(k) {
+    var s = dimensionScores[k] || 4
     if (s <= 3) levels[k] = 'L'
     else if (s <= 5) levels[k] = 'M'
     else levels[k] = 'H'
   })
 
-  let bestType = SBTI_TYPES[0]
-  let bestScore = -1
+  var bestType = SBTI_TYPES[0]
+  var bestScore = -1
 
-  SBTI_TYPES.forEach(t => {
-    let matchScore = 0
-    let totalDims = 0
-    for (const dim in t.pattern) {
+  SBTI_TYPES.forEach(function(t) {
+    var matchScore = 0
+    var totalDims = 0
+    for (var dim in t.pattern) {
       totalDims++
-      const expected = t.pattern[dim]
-      const actual = levels[dim]
+      var expected = t.pattern[dim]
+      var actual = levels[dim]
       if (actual === expected) {
         matchScore += 3
       } else if (
@@ -32,15 +34,15 @@ function calculateResult(dimensionScores) {
         matchScore += 1
       }
     }
-    const normalized = totalDims > 0 ? matchScore / totalDims : 0
-    const finalScore = normalized + (matchScore * 0.05)
+    var normalized = totalDims > 0 ? matchScore / totalDims : 0
+    var finalScore = normalized + (matchScore * 0.05)
     if (finalScore > bestScore) {
       bestScore = finalScore
       bestType = t
     }
   })
 
-  return { type: bestType, levels }
+  return { type: bestType, levels: levels }
 }
 
-module.exports = { calculateResult }
+module.exports = { calculateResult: calculateResult }

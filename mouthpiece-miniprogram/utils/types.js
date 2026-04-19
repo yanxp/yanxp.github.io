@@ -3,7 +3,7 @@
  * 5大模型 × 15个维度 × 25种人格类型
  */
 
-const DIMENSION_LABELS = {
+var DIMENSION_LABELS = {
   expressionStyle:   '表达风格',
   sarcasmLevel:      '阴阳浓度',
   emojiDependency:   '表情包依赖',
@@ -21,9 +21,9 @@ const DIMENSION_LABELS = {
   digitalDetox:      '戒网能力'
 }
 
-const DIMENSION_KEYS = Object.keys(DIMENSION_LABELS)
+var DIMENSION_KEYS = Object.keys(DIMENSION_LABELS)
 
-const SBTI_TYPES = [
+var SBTI_TYPES = [
   {
     code: 'YIN-YANG', emoji: '🗡️', name: '阴阳大师', nameEn: 'The Shade Master',
     tagline: '我没说你不好，我是说在座的各位都是垃圾。',
@@ -226,7 +226,7 @@ const SBTI_TYPES = [
   }
 ]
 
-const TYPE_GROUPS = {
+var TYPE_GROUPS = {
   attack:    { name: '输出型选手', desc: '用文字征服世界的人' },
   warm:      { name: '温暖型选手', desc: '互联网的人间温度' },
   spectator: { name: '围观型选手', desc: '看戏不嫌事大的人' },
@@ -235,4 +235,9 @@ const TYPE_GROUPS = {
   persona:   { name: '人设型选手', desc: '线上线下两幅面孔' }
 }
 
-module.exports = { DIMENSION_LABELS, DIMENSION_KEYS, SBTI_TYPES, TYPE_GROUPS }
+module.exports = {
+  DIMENSION_LABELS: DIMENSION_LABELS,
+  DIMENSION_KEYS: DIMENSION_KEYS,
+  SBTI_TYPES: SBTI_TYPES,
+  TYPE_GROUPS: TYPE_GROUPS
+}

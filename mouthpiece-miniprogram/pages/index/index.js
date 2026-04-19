@@ -1,5 +1,3 @@
-const { SBTI_TYPES } = require('../../utils/types')
-
 Page({
   data: {
     types: [],
@@ -12,13 +10,14 @@ Page({
   },
 
   onLoad() {
-    // Only pass minimal data needed for card display to avoid setData timeout
-    const types = SBTI_TYPES.map(t => ({
-      code: t.code,
-      emoji: t.emoji,
-      name: t.name
-    }))
-    this.setData({ types })
+    var self = this
+    setTimeout(function() {
+      var typesModule = require('../../utils/types')
+      var types = typesModule.SBTI_TYPES.map(function(t) {
+        return { code: t.code, emoji: t.emoji, name: t.name }
+      })
+      self.setData({ types: types })
+    }, 50)
   },
 
   onShareAppMessage() {
@@ -33,7 +32,7 @@ Page({
   },
 
   viewType(e) {
-    const code = e.currentTarget.dataset.code
-    wx.navigateTo({ url: `/pages/type-detail/type-detail?code=${code}` })
+    var code = e.currentTarget.dataset.code
+    wx.navigateTo({ url: '/pages/type-detail/type-detail?code=' + code })
   }
 })

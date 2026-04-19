@@ -1,11 +1,7 @@
-const { DIMENSION_KEYS } = require('../../utils/types')
-const { QUESTIONS } = require('../../utils/questions')
-const { calculateResult } = require('../../utils/quiz')
-
 Page({
   data: {
     currentQuestion: 0,
-    totalQuestions: QUESTIONS.length,
+    totalQuestions: 30,
     question: null,
     progress: 0,
     letters: ['A', 'B', 'C', 'D'],
@@ -13,54 +9,67 @@ Page({
     animating: false
   },
 
-  dimensionScores: {},
+  _questions: null,
+  _dimensionKeys: null,
+  _dimensionScores: null,
 
   onLoad() {
-    this.dimensionScores = {}
-    DIMENSION_KEYS.forEach(k => { this.dimensionScores[k] = 0 })
+    var typesModule = require('../../utils/types')
+    var questionsModule = require('../../utils/questions')
+    this._questions = questionsModule.QUESTIONS
+    this._dimensionKeys = typesModule.DIMENSION_KEYS
+    this._dimensionScores = {}
+    var self = this
+    this._dimensionKeys.forEach(function(k) {
+      self._dimensionScores[k] = 0
+    })
+    this.setData({ totalQuestions: this._questions.length })
     this.showQuestion(0)
   },
 
-  showQuestion(index) {
-    const q = QUESTIONS[index]
+  showQuestion: function(index) {
+    var q = this._questions[index]
     this.setData({
       currentQuestion: index,
       question: q,
-      progress: ((index + 1) / QUESTIONS.length) * 100,
+      progress: ((index + 1) / this._questions.length) * 100,
       selectedIndex: -1,
       animating: false
     })
   },
 
-  selectOption(e) {
+  selectOption: function(e) {
     if (this.data.animating) return
-    const { index, score } = e.currentTarget.dataset
-    const q = QUESTIONS[this.data.currentQuestion]
+    var index = e.currentTarget.dataset.index
+    var score = e.currentTarget.dataset.score
+    var q = this._questions[this.data.currentQuestion]
 
-    this.dimensionScores[q.dimension] = (this.dimensionScores[q.dimension] || 0) + score
+    this._dimensionScores[q.dimension] = (this._dimensionScores[q.dimension] || 0) + score
 
     this.setData({ selectedIndex: index, animating: true })
 
-    setTimeout(() => {
-      const next = this.data.currentQuestion + 1
-      if (next < QUESTIONS.length) {
-        this.showQuestion(next)
+    var self = this
+    setTimeout(function() {
+      var next = self.data.currentQuestion + 1
+      if (next < self._questions.length) {
+        self.showQuestion(next)
       } else {
-        this.showResult()
+        self.showResult()
       }
     }, 400)
   },
 
-  showResult() {
-    const result = calculateResult(this.dimensionScores)
-    const app = getApp()
+  showResult: function() {
+    var quizModule = require('../../utils/quiz')
+    var result = quizModule.calculateResult(this._dimensionScores)
+    var app = getApp()
     app.globalData.resultType = result.type
     app.globalData.resultLevels = result.levels
-    app.globalData.dimensionScores = this.dimensionScores
+    app.globalData.dimensionScores = this._dimensionScores
     wx.redirectTo({ url: '/pages/result/result' })
   },
 
-  goBack() {
+  goBack: function() {
     wx.navigateBack()
   }
 })
