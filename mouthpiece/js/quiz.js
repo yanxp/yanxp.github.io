@@ -229,13 +229,26 @@ function shareResult() {
 
   if (navigator.share) {
     navigator.share({ title: '互联网嘴替测试', text }).catch(() => {});
-  } else {
+  } else if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.querySelector('.btn-share');
       const origHTML = btn.innerHTML;
       btn.textContent = '已复制到剪贴板！';
       setTimeout(() => { btn.innerHTML = origHTML; }, 2000);
     }).catch(() => {});
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.querySelector('.btn-share');
+    const origHTML = btn.innerHTML;
+    btn.textContent = '已复制到剪贴板！';
+    setTimeout(() => { btn.innerHTML = origHTML; }, 2000);
   }
 }
 
