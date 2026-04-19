@@ -36,8 +36,11 @@
     const legendBody = document.getElementById('legend-body');
 
     const MAX_HISTORY = 40;
-    const TRIGGER_HOLD_FRAMES = 15;   // ~500ms @ 30fps
+    // 持续触发类手势（scissors/thumbs_up/ok）的保持帧阈值
+    const TRIGGER_HOLD_FRAMES = 24;   // ~0.8s @ 30fps，避开画画时手抖
     const TRIGGER_COOLDOWN_MS = 1200;
+    // 画画粘滞：进入 point 画画后，需要连续 N 帧非 point 才真正抬笔
+    const DRAW_STICKY_FRAMES = 5;
 
     const state = {
         tool: 'pen',
@@ -55,7 +58,12 @@
         activeGesture: 'none',
         heldGesture: null,
         heldFrames: 0,
-        lastTriggerAt: 0
+        lastTriggerAt: 0,
+        // 画画粘滞计数：进入 point 画画后，累计的连续非 point 帧数
+        nonPointFrames: 0,
+        // 最近一次真正有效的指尖归一化坐标（粘滞期间继续用它推进）
+        lastNormX: null,
+        lastNormY: null
     };
 
     // ---------- Canvas 尺寸与历史 ----------
@@ -372,16 +380,38 @@
             state.activeGesture = 'none';
             state.heldGesture = null;
             state.heldFrames = 0;
+            state.nonPointFrames = 0;
             resetSmooth();
             updateCursor(0, 0, false);
             return;
         }
 
         const { nx, ny } = smoothPos(fingertip.nx, fingertip.ny);
+        state.lastNormX = nx;
+        state.lastNormY = ny;
 
-        handleGestureTriggers(gesture);
+        // 画画时的粘滞判定：如果正在 point 画画，且当前帧是非 point / none，
+        // 则在 DRAW_STICKY_FRAMES 帧内依然按 point 处理，避免短暂误判断线。
+        let effectiveGesture = gesture;
+        if (state.gestureDrawing && gesture !== 'point') {
+            state.nonPointFrames += 1;
+            if (state.nonPointFrames <= DRAW_STICKY_FRAMES && gesture !== 'palm') {
+                effectiveGesture = 'point';
+            }
+        } else if (gesture === 'point') {
+            state.nonPointFrames = 0;
+        }
 
-        if (gesture === 'point') {
+        // 画画过程中不响应 scissors/thumbs_up/ok 触发，避免误撤销/误清空
+        if (!state.gestureDrawing) {
+            handleGestureTriggers(gesture);
+        } else {
+            // 画画中保持冷却计数，但不允许触发
+            state.heldGesture = null;
+            state.heldFrames = 0;
+        }
+
+        if (effectiveGesture === 'point') {
             gestureEraseStop();
             if (!state.gestureDrawing) {
                 gesturePenDown(nx, ny);
@@ -389,8 +419,10 @@
                 gesturePenMove(nx, ny);
             }
             updateCursor(nx, ny, true, state.color);
-            setStatus('✏️ 手势作画中');
-        } else if (gesture === 'palm') {
+            setStatus(gesture === 'point'
+                ? '✏️ 手势作画中'
+                : `✏️ 手势作画中（粘滞 ${state.nonPointFrames}/${DRAW_STICKY_FRAMES}）`);
+        } else if (effectiveGesture === 'palm') {
             gesturePenUp();
             state.gestureErasing = true;
             gestureErase(nx, ny);
@@ -399,14 +431,15 @@
         } else {
             gesturePenUp();
             gestureEraseStop();
+            state.nonPointFrames = 0;
             updateCursor(nx, ny, true, state.color);
-            if (gesture === 'fist') {
+            if (effectiveGesture === 'fist') {
                 setStatus('✊ 抬笔');
-            } else if (gesture === 'scissors') {
+            } else if (effectiveGesture === 'scissors') {
                 setStatus('✌️ 保持剪刀手以撤销…');
-            } else if (gesture === 'thumbs_up') {
+            } else if (effectiveGesture === 'thumbs_up') {
                 setStatus('👍 保持以保存 PNG…');
-            } else if (gesture === 'ok') {
+            } else if (effectiveGesture === 'ok') {
                 setStatus('👌 保持以清空…');
             } else {
                 setStatus('等待手势');

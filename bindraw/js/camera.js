@@ -135,36 +135,51 @@
 
     /**
      * 将 fingersUp 结果与几个额外几何特征组合，分类为命名手势。
+     *
+     * 策略：优先「食指作画」。只要食指明显伸展且中/无/小指多数收起，
+     * 一律判为 point，避免与剪刀手抢手势造成笔触断线。
      */
     function classifyGesture(kp) {
         const fingers = fingersUp(kp);
         const [t, i, m, r, p] = fingers;
-        const extCount = t + i + m + r + p;
+        const otherCount = m + r + p; // 中 + 无 + 小
 
         const handSize = dist(kp[0], kp[9]) || 1;
 
-        // OK 手势：拇指尖与食指尖相近，且至少 2 根其他手指伸展
+        // OK 手势：拇指尖与食指尖相近，且中/无/小至少 2 根伸展
         const thumbIndexTipDist = dist(kp[4], kp[8]);
-        if (thumbIndexTipDist < handSize * 0.45 && (m + r + p) >= 2) {
+        if (thumbIndexTipDist < handSize * 0.40 && otherCount >= 2) {
             return { name: 'ok', fingers };
         }
 
-        const key = [t, i, m, r, p].join('');
-        switch (key) {
-            case '00000': return { name: 'fist', fingers };
-            case '11111': return { name: 'palm', fingers };
-            case '01111': return { name: 'palm', fingers };
-            case '01000': return { name: 'point', fingers };
-            case '11000': return { name: 'point', fingers };
-            case '01100': return { name: 'scissors', fingers };
-            case '11100': return { name: 'scissors', fingers };
-            case '10000': return { name: 'thumbs_up', fingers };
+        // ---- 食指作画优先 ----
+        // 食指伸展 + 中/无/小指至多 1 根伸展 → point（忽略拇指）
+        if (i && otherCount <= 1 && !(m && r)) {
+            return { name: 'point', fingers };
         }
-        // 兜底规则
-        if (i && !m && !r && !p) return { name: 'point', fingers };
-        if (i && m && !r && !p) return { name: 'scissors', fingers };
-        if (extCount >= 4) return { name: 'palm', fingers };
-        if (extCount === 0) return { name: 'fist', fingers };
+
+        // ---- 剪刀手：要求食指 + 中指都伸展 AND 无名 + 小指都收起 ----
+        // 并用几何约束避免把「食指+微抬中指」误判
+        if (i && m && !r && !p) {
+            // 验证中指确实高高伸起：中指 tip 比 PIP 明显远离 MCP
+            const middleMargin =
+                dist(kp[12], kp[9]) / (dist(kp[10], kp[9]) || 1);
+            if (middleMargin > FINGER_EXTEND_RATIO + 0.15) {
+                return { name: 'scissors', fingers };
+            }
+            // 边缘情况：中指不够伸，还是当 point（继续画）
+            return { name: 'point', fingers };
+        }
+
+        // ---- 手掌：至少 4 根非拇指或全部 5 根伸展 ----
+        const nonThumbExt = i + m + r + p;
+        if (nonThumbExt >= 4) return { name: 'palm', fingers };
+
+        // ---- 拳头 ----
+        if (!i && !m && !r && !p && !t) return { name: 'fist', fingers };
+        if (!i && !m && !r && !p && t) return { name: 'thumbs_up', fingers };
+
+        // 其余：当前帧不可靠，返回 none（让 hysteresis 维持之前状态）
         return { name: 'none', fingers };
     }
 
