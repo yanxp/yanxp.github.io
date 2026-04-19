@@ -603,6 +603,12 @@
                 } else {
                     document.body.classList.add('no-camera');
                     gesturePenUp();
+                    // EMA 状态必须清掉，否则重新开启手势时会把上一次的指尖
+                    // 位置和新的第一帧混合，导致 penDown 落笔在错误的插值点
+                    resetSmooth();
+                    state.nonPointFrames = 0;
+                    state.lastNormX = null;
+                    state.lastNormY = null;
                     updateCursor(0, 0, false);
                 }
             });
