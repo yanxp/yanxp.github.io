@@ -170,6 +170,23 @@ input[type="range"] {
     background: #000;
 }
 
+/* 未开启摄像头时：画布独立显示，背景改为亚麻纸感的浅灰 */
+body.no-camera .workspace {
+    background: #f5f7fb;
+    background-image:
+        linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+body.no-camera .stage video,
+body.no-camera .stage #camera-overlay,
+body.no-camera .gesture-badge,
+body.no-camera #camera-status,
+body.no-camera .legend {
+    display: none !important;
+}
+
 .stage {
     position: absolute;
     inset: 0;

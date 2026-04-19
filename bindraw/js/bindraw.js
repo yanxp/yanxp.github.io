@@ -598,7 +598,10 @@
                 if (window.BindrawCamera && typeof window.BindrawCamera.setEnabled === 'function') {
                     window.BindrawCamera.setEnabled(e.target.checked);
                 }
-                if (!e.target.checked) {
+                if (e.target.checked) {
+                    document.body.classList.remove('no-camera');
+                } else {
+                    document.body.classList.add('no-camera');
                     gesturePenUp();
                     updateCursor(0, 0, false);
                 }

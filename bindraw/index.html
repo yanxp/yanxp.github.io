@@ -7,10 +7,10 @@
     <meta name="description" content="基于 TensorFlow.js + MediaPipe Hands 的前置摄像头手势识别画图工具。指尖即画笔，直接在摄像头画面上作画。" />
     <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body class="no-camera">
     <header class="app-header">
         <h1 class="app-title">Bindraw</h1>
-        <p class="app-subtitle">前置摄像头手势识别 · 指尖即画笔</p>
+        <p class="app-subtitle">画布直接作画 · 可选前置摄像头手势</p>
     </header>
 
     <nav class="toolbar" aria-label="画板工具栏">
@@ -54,8 +54,8 @@
 
         <div class="tool-group">
             <label class="tool-label toggle-label">
-                <input type="checkbox" id="gesture-toggle" checked />
-                <span>手势控制</span>
+                <input type="checkbox" id="gesture-toggle" />
+                <span>启用手势（需摄像头）</span>
             </label>
             <label class="tool-label toggle-label">
                 <input type="checkbox" id="camera-toggle" checked />
@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            <div class="loading-overlay" id="loading-overlay" aria-live="polite">
+            <div class="loading-overlay hidden" id="loading-overlay" aria-live="polite">
                 <div class="loading-card">
                     <div class="loading-spinner" aria-hidden="true"></div>
                     <div class="loading-title" id="loading-title">正在加载手势识别模型…</div>

@@ -51,7 +51,9 @@
     let detector = null;
     let stream = null;
     let running = false;
-    let enabled = true;
+    let enabled = false;           // 默认关闭：页面加载不请求摄像头
+    let initStarted = false;       // init() 是否已被调用过（避免重复请求权限）
+    let initSucceeded = false;     // init() 是否已成功到能开始识别
     let showSkeleton = true;
     const listeners = [];
 
@@ -60,6 +62,13 @@
 
     function setStatus(text) {
         if (statusEl) statusEl.textContent = text;
+    }
+
+    // init 失败时把页面恢复到「无摄像头」状态：取消勾选手势开关 + 加回 body 标记
+    function revertToNoCamera() {
+        const toggle = document.getElementById('gesture-toggle');
+        if (toggle) toggle.checked = false;
+        document.body.classList.add('no-camera');
     }
 
     function setLoading(visible, title, sub) {
@@ -240,9 +249,17 @@
     }
 
     async function initCamera() {
+        if (initStarted) return;
+        initStarted = true;
+        enabled = true;
+
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             setStatus('当前浏览器不支持摄像头 API');
             setLoading(true, '当前浏览器不支持摄像头 API', '请在最新 Chrome / Safari / Edge 中打开');
+            setTimeout(() => setLoading(false), 2500);
+            initStarted = false;
+            enabled = false;
+            revertToNoCamera();
             return;
         }
 
@@ -260,19 +277,24 @@
         } catch (err) {
             console.error('[bindraw] getUserMedia failed', err);
             let message = '无法访问摄像头：' + (err && err.name ? err.name : 'UnknownError');
-            let sub = '请刷新页面或检查系统相机权限';
+            let sub = '已自动关闭手势，可继续用鼠标 / 触屏作画';
             if (err && err.name === 'NotAllowedError') {
                 message = '摄像头权限被拒绝';
-                sub = '请在浏览器地址栏的权限设置中允许摄像头后刷新页面';
+                sub = '请在浏览器地址栏允许摄像头后再开启「启用手势」';
             } else if (err && err.name === 'NotFoundError') {
                 message = '未检测到可用摄像头';
-                sub = '请确认摄像头已连接并未被其他应用占用';
+                sub = '请确认摄像头已连接并未被其它应用占用';
             } else if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
                 message = '请在 HTTPS 或 localhost 下访问';
                 sub = '浏览器仅在安全上下文下允许访问摄像头';
             }
             setStatus(message);
             setLoading(true, message, sub);
+            // 2.5s 后自动隐藏遮罩，让用户回到画布继续作画
+            setTimeout(() => setLoading(false), 2500);
+            initStarted = false;
+            enabled = false;
+            revertToNoCamera();
             return;
         }
 
@@ -291,11 +313,22 @@
         setLoading(true, '加载手势识别模型…', '首屏约需下载 2–5 MB，通常 2–10 秒');
         await loadDetector();
 
-        if (!detector) return;
+        if (!detector) {
+            setTimeout(() => setLoading(false), 2500);
+            initStarted = false;
+            enabled = false;
+            if (stream) {
+                stream.getTracks().forEach((t) => t.stop());
+                stream = null;
+            }
+            revertToNoCamera();
+            return;
+        }
 
         setStatus('✅ 就绪 · 请把手伸到摄像头前');
         setLoading(false);
         showReadyBanner();
+        initSucceeded = true;
         running = true;
         detectLoop();
     }
@@ -373,14 +406,20 @@
     }
 
     function setEnabled(flag) {
-        enabled = !!flag;
+        const target = !!flag;
+        if (target && !initStarted) {
+            // 首次开启：惰性请求摄像头权限 + 加载模型
+            initCamera();
+            return;
+        }
+        enabled = target;
         if (!enabled) {
             overlayCtx.clearRect(0, 0, overlayEl.width, overlayEl.height);
             updateGestureBadge('none');
             notifyListeners({ gesture: 'none', fingertip: null, raw: null, disabled: true });
             setStatus('手势控制已关闭');
         } else {
-            setStatus('识别中');
+            setStatus(initSucceeded ? '识别中' : '手势模型加载中…');
         }
     }
 
@@ -410,9 +449,6 @@
         setVisible
     };
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initCamera);
-    } else {
-        initCamera();
-    }
+    // 不自动初始化：只有用户勾选「启用手势」时才请求摄像头权限 + 加载模型。
+    // 入口由 bindraw.js 中的 gesture-toggle 触发 BindrawCamera.setEnabled(true)。
 })();
