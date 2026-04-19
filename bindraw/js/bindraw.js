@@ -48,6 +48,7 @@
         redoStack: [],
         // 手势相关
         gestureDrawing: false,
+        gestureErasing: false,
         smoothX: null,
         smoothY: null,
         activeGesture: 'none',
@@ -313,9 +314,15 @@
         }
 
         const cooldownOk = now - state.lastTriggerAt > TRIGGER_COOLDOWN_MS;
-        if (!cooldownOk) return false;
+        if (!cooldownOk) {
+            // 冷却期内防止 heldFrames 跨过阈值而再也无法相等；下次冷却结束时可立即触发
+            if (state.heldFrames >= TRIGGER_HOLD_FRAMES) {
+                state.heldFrames = TRIGGER_HOLD_FRAMES - 1;
+            }
+            return false;
+        }
 
-        if (state.heldFrames === TRIGGER_HOLD_FRAMES) {
+        if (state.heldFrames >= TRIGGER_HOLD_FRAMES) {
             if (gesture === 'scissors') {
                 state.lastTriggerAt = now;
                 undo();
@@ -375,12 +382,20 @@
         }
     }
 
+    function gestureEraseStop() {
+        if (state.gestureErasing) {
+            state.gestureErasing = false;
+            saveHistory();
+        }
+    }
+
     function onGestureFrame(payload) {
         if (!gestureToggle.checked) return;
         const { gesture, fingertip, disabled } = payload;
 
         if (disabled || !fingertip) {
             gesturePenUp();
+            gestureEraseStop();
             state.activeGesture = 'none';
             state.heldGesture = null;
             state.heldFrames = 0;
@@ -394,6 +409,7 @@
         handleGestureTriggers(gesture);
 
         if (gesture === 'point') {
+            gestureEraseStop();
             if (!state.gestureDrawing) {
                 gesturePenDown(nx, ny);
             } else {
@@ -403,12 +419,14 @@
             setStatus('✏️ 手势作画中');
         } else if (gesture === 'palm') {
             gesturePenUp();
+            state.gestureErasing = true;
             gestureErase(nx, ny);
             updateCursor(nx, ny, true, '#ef4444');
             setStatus('🧽 手势擦除中');
         } else {
-            // fist / scissors / thumbs_up / ok / none — 抬笔，仅显示光标
+            // fist / scissors / thumbs_up / ok / none — 抬笔/停擦，仅显示光标
             gesturePenUp();
+            gestureEraseStop();
             updateCursor(nx, ny, true, state.color);
             if (gesture === 'fist') setStatus('✊ 已抬笔');
             else if (gesture === 'scissors') setStatus('✌️ 保持以撤销…');

@@ -201,6 +201,11 @@
 
     async function detectLoop() {
         if (!detector || !running) return;
+        if (!enabled) {
+            // 手势控制被关闭：保持循环但跳过识别与绘制，下次开启能立刻恢复
+            requestAnimationFrame(detectLoop);
+            return;
+        }
         try {
             if (videoEl.readyState >= 2) {
                 const hands = await detector.estimateHands(videoEl, { flipHorizontal: false });
