@@ -229,14 +229,20 @@ function shareResult() {
 
   if (navigator.share) {
     navigator.share({ title: '互联网嘴替测试', text }).catch(() => {});
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.querySelector('.btn-share');
-      const origHTML = btn.innerHTML;
-      btn.textContent = '已复制到剪贴板！';
-      setTimeout(() => { btn.innerHTML = origHTML; }, 2000);
-    }).catch(() => {});
   } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  function showCopied() {
+    const btn = document.querySelector('.btn-share');
+    if (!btn) return;
+    const origHTML = btn.innerHTML;
+    btn.textContent = '已复制到剪贴板！';
+    setTimeout(() => { btn.innerHTML = origHTML; }, 2000);
+  }
+  function execCopy() {
     const ta = document.createElement('textarea');
     ta.value = text;
     ta.style.position = 'fixed';
@@ -245,10 +251,12 @@ function shareResult() {
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-    const btn = document.querySelector('.btn-share');
-    const origHTML = btn.innerHTML;
-    btn.textContent = '已复制到剪贴板！';
-    setTimeout(() => { btn.innerHTML = origHTML; }, 2000);
+    showCopied();
+  }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(showCopied).catch(execCopy);
+  } else {
+    execCopy();
   }
 }
 
