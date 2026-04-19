@@ -40,6 +40,19 @@
         </div>
 
         <div class="tool-group">
+            <label class="tool-label" for="template-picker">素描模板</label>
+            <select id="template-picker" class="tool-select" title="选择动物线稿模板">
+                <option value="none">无模板</option>
+                <option value="cat">🐱 小猫</option>
+                <option value="rabbit">🐰 小兔</option>
+                <option value="fish">🐟 小鱼</option>
+                <option value="butterfly">🦋 蝴蝶</option>
+                <option value="dinosaur">🦕 恐龙</option>
+                <option value="turtle">🐢 乌龟</option>
+            </select>
+        </div>
+
+        <div class="tool-group">
             <label class="tool-label toggle-label">
                 <input type="checkbox" id="gesture-toggle" checked />
                 <span>手势控制</span>
@@ -88,17 +101,14 @@
                 </div>
             </div>
 
-            <aside class="legend" aria-label="手势控制图例">
+            <aside class="legend" aria-label="手势说明">
                 <button type="button" id="legend-toggle" class="legend-toggle" aria-expanded="true">手势说明</button>
                 <div class="legend-body" id="legend-body">
                     <ul>
-                        <li><span class="legend-emoji">☝️</span> 食指 — 下笔作画</li>
-                        <li><span class="legend-emoji">✊</span> 握拳 — 抬笔</li>
-                        <li><span class="legend-emoji">✋</span> 手掌 — 橡皮擦</li>
-                        <li><span class="legend-emoji">✌️</span> 剪刀 — 撤销（保持 ~0.5s）</li>
-                        <li><span class="legend-emoji">👍</span> 点赞 — 保存 PNG</li>
-                        <li><span class="legend-emoji">👌</span> OK — 清空画布</li>
+                        <li><span class="legend-emoji">☝️</span> 竖起食指 — 下笔作画</li>
+                        <li><span class="legend-emoji">🖐</span> 其它姿势 — 抬笔</li>
                     </ul>
+                    <p class="legend-note">撤销 / 清空 / 保存请使用上方工具栏。</p>
                 </div>
             </aside>
         </section>

@@ -39,13 +39,8 @@
     ];
 
     const GESTURE_META = {
-        point:     { emoji: '☝️', name: '指向（作画）' },
-        fist:      { emoji: '✊', name: '握拳（抬笔）' },
-        palm:      { emoji: '✋', name: '手掌（橡皮擦）' },
-        scissors:  { emoji: '✌️', name: '剪刀（撤销）' },
-        thumbs_up: { emoji: '👍', name: '点赞（保存）' },
-        ok:        { emoji: '👌', name: 'OK（清空）' },
-        none:      { emoji: '🖐', name: '等待手势' }
+        point: { emoji: '☝️', name: '食指作画' },
+        none:  { emoji: '🖐', name: '抬笔 / 等待食指' }
     };
 
     // 放宽后的手指伸展阈值（tip 到 MCP 的距离 / PIP 到 MCP 的距离）
@@ -134,53 +129,25 @@
     }
 
     /**
-     * 将 fingersUp 结果与几个额外几何特征组合，分类为命名手势。
+     * 极简分类器：只判「食指在画 / 抬笔」两种状态。
      *
-     * 策略：优先「食指作画」。只要食指明显伸展且中/无/小指多数收起，
-     * 一律判为 point，避免与剪刀手抢手势造成笔触断线。
+     * - 食指伸展 AND（中指收起 OR 小指、无名至少 1 根收起）→ point
+     *   （忽略拇指状态；允许中指轻微抬起，保证画画不断线）
+     * - 其它情况 → none（抬笔 / 等待）
      */
     function classifyGesture(kp) {
         const fingers = fingersUp(kp);
-        const [t, i, m, r, p] = fingers;
-        const otherCount = m + r + p; // 中 + 无 + 小
+        const [, i, m, r, p] = fingers;
 
-        const handSize = dist(kp[0], kp[9]) || 1;
+        // 食指必须伸展
+        if (!i) return { name: 'none', fingers };
 
-        // OK 手势：拇指尖与食指尖相近，且中/无/小至少 2 根伸展
-        const thumbIndexTipDist = dist(kp[4], kp[8]);
-        if (thumbIndexTipDist < handSize * 0.40 && otherCount >= 2) {
-            return { name: 'ok', fingers };
-        }
+        // 如果中/无名/小指「大部分」伸展（>=2 根），多半是张开手掌 / 招手，
+        // 不是要画画；这时抬笔
+        const others = m + r + p;
+        if (others >= 2) return { name: 'none', fingers };
 
-        // ---- 食指作画优先 ----
-        // 食指伸展 + 中/无/小指至多 1 根伸展 → point（忽略拇指）
-        if (i && otherCount <= 1 && !(m && r)) {
-            return { name: 'point', fingers };
-        }
-
-        // ---- 剪刀手：要求食指 + 中指都伸展 AND 无名 + 小指都收起 ----
-        // 并用几何约束避免把「食指+微抬中指」误判
-        if (i && m && !r && !p) {
-            // 验证中指确实高高伸起：中指 tip 比 PIP 明显远离 MCP
-            const middleMargin =
-                dist(kp[12], kp[9]) / (dist(kp[10], kp[9]) || 1);
-            if (middleMargin > FINGER_EXTEND_RATIO + 0.15) {
-                return { name: 'scissors', fingers };
-            }
-            // 边缘情况：中指不够伸，还是当 point（继续画）
-            return { name: 'point', fingers };
-        }
-
-        // ---- 手掌：至少 4 根非拇指或全部 5 根伸展 ----
-        const nonThumbExt = i + m + r + p;
-        if (nonThumbExt >= 4) return { name: 'palm', fingers };
-
-        // ---- 拳头 ----
-        if (!i && !m && !r && !p && !t) return { name: 'fist', fingers };
-        if (!i && !m && !r && !p && t) return { name: 'thumbs_up', fingers };
-
-        // 其余：当前帧不可靠，返回 none（让 hysteresis 维持之前状态）
-        return { name: 'none', fingers };
+        return { name: 'point', fingers };
     }
 
     function drawSkeleton(hand) {

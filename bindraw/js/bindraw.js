@@ -5,12 +5,10 @@
  *
  * - 鼠标 / 触屏：画笔、橡皮擦、颜色、粗细、撤销、重做、清空、保存 PNG
  * - 手势驱动（订阅 window.BindrawCamera 的手势事件）：
- *     ☝️ point     → 下笔，以指尖位置连续作画
- *     ✊ fist      → 抬笔（仅显示光标）
- *     ✋ palm      → 橡皮擦
- *     ✌️ scissors → 撤销（保持手势 ~0.5s 触发，防抖）
- *     👍 thumbs_up → 保存 PNG（保持手势触发）
- *     👌 ok        → 清空画布（保持手势触发）
+ *     ☝️ point  → 下笔，以指尖位置连续作画
+ *     🖐 none   → 抬笔（只显示光标）
+ *   其它操作（撤销、保存、清空）通过工具栏完成，避免手势误触。
+ * - 素描模板：可选择动物线稿作为底图，小朋友在上面着色。
  */
 (function () {
     'use strict';
@@ -29,17 +27,113 @@
     const colorInput = document.getElementById('color-picker');
     const sizeSlider = document.getElementById('size-slider');
     const sizeValue = document.getElementById('size-value');
+    const templatePicker = document.getElementById('template-picker');
     const gestureToggle = document.getElementById('gesture-toggle');
     const cameraToggle = document.getElementById('camera-toggle');
     const skeletonToggle = document.getElementById('skeleton-toggle');
     const legendToggle = document.getElementById('legend-toggle');
     const legendBody = document.getElementById('legend-body');
 
+    // ---------- 动物素描模板（内联 SVG，viewBox 400x300，浅灰线稿） ----------
+    const TEMPLATE_STROKE = '#9ca3af';
+    const TEMPLATE_SVGS = {
+        cat: `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <g fill="none" stroke="${TEMPLATE_STROKE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M130 115 L115 50 L180 102 Z"/>
+    <path d="M270 115 L285 50 L220 102 Z"/>
+    <circle cx="200" cy="170" r="92"/>
+    <circle cx="170" cy="162" r="9"/>
+    <circle cx="230" cy="162" r="9"/>
+    <path d="M192 192 Q200 205 208 192 Z"/>
+    <path d="M200 205 Q200 215 200 218 M200 218 Q188 230 180 222 M200 218 Q212 230 220 222"/>
+    <path d="M125 195 L170 200 M125 208 L170 205"/>
+    <path d="M275 195 L230 200 M275 208 L230 205"/>
+  </g>
+</svg>`,
+        rabbit: `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <g fill="none" stroke="${TEMPLATE_STROKE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="170" cy="65" rx="14" ry="48"/>
+    <ellipse cx="230" cy="65" rx="14" ry="48"/>
+    <circle cx="200" cy="150" r="52"/>
+    <circle cx="181" cy="146" r="5"/>
+    <circle cx="219" cy="146" r="5"/>
+    <path d="M195 162 Q200 170 205 162 Z"/>
+    <path d="M200 170 L200 180 M200 180 Q190 188 184 184 M200 180 Q210 188 216 184"/>
+    <ellipse cx="200" cy="235" rx="58" ry="38"/>
+    <ellipse cx="170" cy="272" rx="18" ry="9"/>
+    <ellipse cx="230" cy="272" rx="18" ry="9"/>
+  </g>
+</svg>`,
+        fish: `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <g fill="none" stroke="${TEMPLATE_STROKE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M90 150 Q200 55 290 150 Q200 245 90 150 Z"/>
+    <path d="M290 150 L355 95 L340 150 L355 205 Z"/>
+    <circle cx="140" cy="135" r="9"/>
+    <circle cx="140" cy="135" r="3" fill="${TEMPLATE_STROKE}"/>
+    <path d="M175 108 Q183 150 175 192"/>
+    <path d="M205 180 Q222 220 248 210"/>
+    <path d="M205 90 Q235 68 252 88"/>
+    <path d="M228 130 Q238 140 228 150"/>
+    <path d="M250 122 Q260 135 250 148"/>
+  </g>
+</svg>`,
+        butterfly: `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <g fill="none" stroke="${TEMPLATE_STROKE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="200" cy="150" rx="8" ry="60"/>
+    <circle cx="200" cy="82" r="10"/>
+    <path d="M195 74 Q178 56 172 44"/>
+    <path d="M205 74 Q222 56 228 44"/>
+    <path d="M192 110 Q90 80 95 165 Q140 160 192 140 Z"/>
+    <path d="M208 110 Q310 80 305 165 Q260 160 208 140 Z"/>
+    <path d="M192 155 Q105 180 130 245 Q170 230 192 190 Z"/>
+    <path d="M208 155 Q295 180 270 245 Q230 230 208 190 Z"/>
+    <circle cx="140" cy="122" r="8"/>
+    <circle cx="260" cy="122" r="8"/>
+    <circle cx="155" cy="210" r="6"/>
+    <circle cx="245" cy="210" r="6"/>
+  </g>
+</svg>`,
+        dinosaur: `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <g fill="none" stroke="${TEMPLATE_STROKE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 220 Q80 150 150 140 Q250 130 310 150 Q340 160 340 200 Q340 235 310 240 L110 240 Q80 240 80 220 Z"/>
+    <path d="M310 150 Q358 128 368 88 Q372 65 338 62 Q318 60 320 82 L322 105 Q318 125 308 142"/>
+    <circle cx="350" cy="85" r="3" fill="${TEMPLATE_STROKE}"/>
+    <path d="M345 100 L358 100"/>
+    <path d="M130 240 L130 285 M180 240 L180 285 M240 240 L240 285 M290 240 L290 285"/>
+    <path d="M130 145 L142 120 L154 146"/>
+    <path d="M170 142 L184 112 L198 142"/>
+    <path d="M210 140 L226 108 L240 140"/>
+    <path d="M248 144 L262 112 L276 146"/>
+    <path d="M80 208 Q42 216 20 240"/>
+  </g>
+</svg>`,
+        turtle: `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <g fill="none" stroke="${TEMPLATE_STROKE}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="200" cy="160" rx="110" ry="78"/>
+    <path d="M200 82 L200 238"/>
+    <path d="M128 130 L272 130 M120 170 L280 170 M136 208 L264 208"/>
+    <path d="M158 100 L158 225 M242 100 L242 225"/>
+    <ellipse cx="320" cy="155" rx="30" ry="22"/>
+    <circle cx="332" cy="148" r="3" fill="${TEMPLATE_STROKE}"/>
+    <path d="M308 158 L302 168"/>
+    <ellipse cx="118" cy="220" rx="26" ry="12"/>
+    <ellipse cx="282" cy="220" rx="26" ry="12"/>
+    <ellipse cx="140" cy="105" rx="22" ry="10"/>
+    <ellipse cx="260" cy="105" rx="22" ry="10"/>
+    <path d="M88 160 L62 152 L68 170 Z"/>
+  </g>
+</svg>`
+    };
+
     const MAX_HISTORY = 40;
-    // 持续触发类手势（scissors/thumbs_up/ok）的保持帧阈值
-    const TRIGGER_HOLD_FRAMES = 24;   // ~0.8s @ 30fps，避开画画时手抖
-    const TRIGGER_COOLDOWN_MS = 1200;
-    // 画画粘滞：进入 point 画画后，需要连续 N 帧非 point 才真正抬笔
+    // 画画粘滞：进入 point 画画后，需要连续 N 帧非 point 才真正抬笔，
+    // 避免识别偶发抖动导致断线。
     const DRAW_STICKY_FRAMES = 5;
 
     const state = {
@@ -52,18 +146,13 @@
         history: [],
         redoStack: [],
         gestureDrawing: false,
-        gestureErasing: false,
         smoothX: null,
         smoothY: null,
         activeGesture: 'none',
-        heldGesture: null,
-        heldFrames: 0,
-        lastTriggerAt: 0,
-        // 画画粘滞计数：进入 point 画画后，累计的连续非 point 帧数
         nonPointFrames: 0,
-        // 最近一次真正有效的指尖归一化坐标（粘滞期间继续用它推进）
         lastNormX: null,
-        lastNormY: null
+        lastNormY: null,
+        templateKey: 'none'
     };
 
     // ---------- Canvas 尺寸与历史 ----------
@@ -152,6 +241,79 @@
         ctx.restore();
         saveHistory();
         setStatus('画布已清空');
+    }
+
+    // ---------- 素描模板 ----------
+
+    function canvasHasDrawing() {
+        try {
+            const w = canvas.width;
+            const h = canvas.height;
+            if (!w || !h) return false;
+            // 采样：顶部、中心、底部三条线段上的像素，只要有非透明像素即视为有画
+            const samples = [
+                ctx.getImageData(0, Math.floor(h * 0.2), w, 1),
+                ctx.getImageData(0, Math.floor(h * 0.5), w, 1),
+                ctx.getImageData(0, Math.floor(h * 0.8), w, 1)
+            ];
+            for (const s of samples) {
+                const d = s.data;
+                for (let i = 3; i < d.length; i += 4) {
+                    if (d[i] > 0) return true;
+                }
+            }
+            return false;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function loadTemplate(key) {
+        if (!key || key === 'none') {
+            return;
+        }
+        const svg = TEMPLATE_SVGS[key];
+        if (!svg) return;
+
+        if (canvasHasDrawing()) {
+            const ok = confirm('切换素描模板会清空当前画布，继续吗？');
+            if (!ok) {
+                // 还原 picker 的值到当前已加载模板
+                if (templatePicker) templatePicker.value = state.templateKey || 'none';
+                return;
+            }
+        }
+
+        const img = new Image();
+        img.onload = () => {
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // SVG viewBox 400x300，等比居中缩放进画布
+            const svgW = 400;
+            const svgH = 300;
+            const scale = Math.min(canvas.width / svgW, canvas.height / svgH) * 0.85;
+            const drawW = svgW * scale;
+            const drawH = svgH * scale;
+            const offX = (canvas.width - drawW) / 2;
+            const offY = (canvas.height - drawH) / 2;
+            ctx.drawImage(img, offX, offY, drawW, drawH);
+            ctx.restore();
+
+            state.templateKey = key;
+            // 作为新的「基态」保存到历史
+            state.history = [];
+            state.redoStack = [];
+            saveHistory();
+            setStatus('已加载素描模板 · 可在上面着色');
+        };
+        img.onerror = () => {
+            setStatus('模板加载失败');
+        };
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        img.src = URL.createObjectURL(blob);
     }
 
     // ---------- 工具状态 ----------
@@ -284,43 +446,6 @@
         return { x: nx * canvas.width, y: ny * canvas.height };
     }
 
-    function handleGestureTriggers(gesture) {
-        const now = performance.now();
-        if (gesture === state.heldGesture) {
-            state.heldFrames += 1;
-        } else {
-            state.heldGesture = gesture;
-            state.heldFrames = 1;
-        }
-
-        const cooldownOk = now - state.lastTriggerAt > TRIGGER_COOLDOWN_MS;
-        if (!cooldownOk) {
-            if (state.heldFrames >= TRIGGER_HOLD_FRAMES) {
-                state.heldFrames = TRIGGER_HOLD_FRAMES - 1;
-            }
-            return false;
-        }
-
-        if (state.heldFrames >= TRIGGER_HOLD_FRAMES) {
-            if (gesture === 'scissors') {
-                state.lastTriggerAt = now;
-                undo();
-                return true;
-            }
-            if (gesture === 'thumbs_up') {
-                state.lastTriggerAt = now;
-                savePng();
-                return true;
-            }
-            if (gesture === 'ok') {
-                state.lastTriggerAt = now;
-                if (confirm('OK 手势：确定要清空画布吗？')) clearCanvas();
-                return true;
-            }
-        }
-        return false;
-    }
-
     function gesturePenDown(nx, ny) {
         const { x, y } = canvasCoordFromNorm(nx, ny);
         state.lastX = x;
@@ -344,28 +469,9 @@
         state.lastY = y;
     }
 
-    function gestureErase(nx, ny) {
-        const { x, y } = canvasCoordFromNorm(nx, ny);
-        const dpr = window.devicePixelRatio || 1;
-        applyStrokeStyle('eraser');
-        // 橡皮擦半径按 CSS 像素定义，乘 DPR 以保持视觉大小一致
-        const r = Math.max(12, state.size * 2.5) * dpr;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalCompositeOperation = 'source-over';
-    }
-
     function gesturePenUp() {
         if (state.gestureDrawing) {
             state.gestureDrawing = false;
-            saveHistory();
-        }
-    }
-
-    function gestureEraseStop() {
-        if (state.gestureErasing) {
-            state.gestureErasing = false;
             saveHistory();
         }
     }
@@ -376,13 +482,11 @@
 
         if (disabled || !fingertip) {
             gesturePenUp();
-            gestureEraseStop();
             state.activeGesture = 'none';
-            state.heldGesture = null;
-            state.heldFrames = 0;
             state.nonPointFrames = 0;
             resetSmooth();
             updateCursor(0, 0, false);
+            setStatus('未检测到手');
             return;
         }
 
@@ -390,60 +494,31 @@
         state.lastNormX = nx;
         state.lastNormY = ny;
 
-        // 画画时的粘滞判定：如果正在 point 画画，且当前帧是非 point / none，
-        // 则在 DRAW_STICKY_FRAMES 帧内依然按 point 处理，避免短暂误判断线。
+        // 画画时的粘滞判定：已在画画且当前帧是 none，
+        // 在 DRAW_STICKY_FRAMES 帧内仍当作 point，避免偶发误判导致断线
         let effectiveGesture = gesture;
         if (state.gestureDrawing && gesture !== 'point') {
             state.nonPointFrames += 1;
-            if (state.nonPointFrames <= DRAW_STICKY_FRAMES && gesture !== 'palm') {
+            if (state.nonPointFrames <= DRAW_STICKY_FRAMES) {
                 effectiveGesture = 'point';
             }
         } else if (gesture === 'point') {
             state.nonPointFrames = 0;
         }
 
-        // 画画过程中不响应 scissors/thumbs_up/ok 触发，避免误撤销/误清空
-        if (!state.gestureDrawing) {
-            handleGestureTriggers(gesture);
-        } else {
-            // 画画中保持冷却计数，但不允许触发
-            state.heldGesture = null;
-            state.heldFrames = 0;
-        }
-
         if (effectiveGesture === 'point') {
-            gestureEraseStop();
             if (!state.gestureDrawing) {
                 gesturePenDown(nx, ny);
             } else {
                 gesturePenMove(nx, ny);
             }
             updateCursor(nx, ny, true, state.color);
-            setStatus(gesture === 'point'
-                ? '✏️ 手势作画中'
-                : `✏️ 手势作画中（粘滞 ${state.nonPointFrames}/${DRAW_STICKY_FRAMES}）`);
-        } else if (effectiveGesture === 'palm') {
-            gesturePenUp();
-            state.gestureErasing = true;
-            gestureErase(nx, ny);
-            updateCursor(nx, ny, true, '#ef4444');
-            setStatus('🧽 手势擦除中');
+            setStatus('✏️ 食指作画中');
         } else {
             gesturePenUp();
-            gestureEraseStop();
             state.nonPointFrames = 0;
             updateCursor(nx, ny, true, state.color);
-            if (effectiveGesture === 'fist') {
-                setStatus('✊ 抬笔');
-            } else if (effectiveGesture === 'scissors') {
-                setStatus('✌️ 保持剪刀手以撤销…');
-            } else if (effectiveGesture === 'thumbs_up') {
-                setStatus('👍 保持以保存 PNG…');
-            } else if (effectiveGesture === 'ok') {
-                setStatus('👌 保持以清空…');
-            } else {
-                setStatus('等待手势');
-            }
+            setStatus('🖐 抬笔 · 竖食指开始作画');
         }
 
         state.activeGesture = gesture;
@@ -468,6 +543,22 @@
             state.size = parseInt(e.target.value, 10);
             if (sizeValue) sizeValue.textContent = String(state.size);
         });
+
+        if (templatePicker) {
+            templatePicker.addEventListener('change', (e) => {
+                const key = e.target.value;
+                if (key === 'none') {
+                    if (canvasHasDrawing() && !confirm('清空画布并移除模板？')) {
+                        templatePicker.value = state.templateKey || 'none';
+                        return;
+                    }
+                    clearCanvas();
+                    state.templateKey = 'none';
+                    return;
+                }
+                loadTemplate(key);
+            });
+        }
 
         // 鼠标
         canvas.addEventListener('mousedown', beginStroke);
@@ -502,7 +593,6 @@
                 }
                 if (!e.target.checked) {
                     gesturePenUp();
-                    gestureEraseStop();
                     updateCursor(0, 0, false);
                 }
             });

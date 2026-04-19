@@ -135,6 +135,22 @@ input[type="range"] {
     width: 140px;
 }
 
+.tool-select {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.tool-select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
 .toggle-label {
     display: inline-flex;
     align-items: center;
@@ -276,6 +292,15 @@ input[type="range"] {
     display: flex;
     align-items: center;
     gap: 8px;
+    line-height: 1.35;
+}
+
+.legend-note {
+    margin: 8px 0 0;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    color: #cbd5e1;
+    font-size: 0.78rem;
     line-height: 1.35;
 }
 
