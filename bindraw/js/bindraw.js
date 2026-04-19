@@ -284,8 +284,11 @@
             }
         }
 
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const blobUrl = URL.createObjectURL(blob);
         const img = new Image();
         img.onload = () => {
+            URL.revokeObjectURL(blobUrl);
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.globalCompositeOperation = 'source-over';
@@ -310,10 +313,10 @@
             setStatus('已加载素描模板 · 可在上面着色');
         };
         img.onerror = () => {
+            URL.revokeObjectURL(blobUrl);
             setStatus('模板加载失败');
         };
-        const blob = new Blob([svg], { type: 'image/svg+xml' });
-        img.src = URL.createObjectURL(blob);
+        img.src = blobUrl;
     }
 
     // ---------- 工具状态 ----------
@@ -373,6 +376,10 @@
         if (!state.drawing) return;
         evt.preventDefault();
         const { x, y } = pointerPos(evt);
+        // 手势识别循环会在 mousemove 之间 applyStrokeStyle('pen')，
+        // 这会把 globalCompositeOperation 改回 source-over，导致本次
+        // 鼠标橡皮擦回写成画笔。每帧重新应用本地工具样式即可。
+        applyStrokeStyle();
         ctx.beginPath();
         ctx.moveTo(state.lastX, state.lastY);
         ctx.lineTo(x, y);
