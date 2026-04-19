@@ -1,6 +1,3 @@
 {
-  "navigationBarTitleText": "互联网嘴替测试",
-  "usingComponents": {
-    "type-card": "/components/type-card/type-card"
-  }
+  "navigationBarTitleText": "互联网嘴替测试"
 }

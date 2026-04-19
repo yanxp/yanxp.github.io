@@ -2,7 +2,7 @@ const { SBTI_TYPES } = require('../../utils/types')
 
 Page({
   data: {
-    types: SBTI_TYPES,
+    types: [],
     stats: {
       questions: 30,
       models: 5,
@@ -11,7 +11,15 @@ Page({
     }
   },
 
-  onLoad() {},
+  onLoad() {
+    // Only pass minimal data needed for card display to avoid setData timeout
+    const types = SBTI_TYPES.map(t => ({
+      code: t.code,
+      emoji: t.emoji,
+      name: t.name
+    }))
+    this.setData({ types })
+  },
 
   onShareAppMessage() {
     return {

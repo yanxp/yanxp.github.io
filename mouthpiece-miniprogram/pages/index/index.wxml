@@ -41,7 +41,11 @@
     <view class="section-title">25种网络人格</view>
     <view class="section-sub">点击任意卡片了解详情</view>
     <view class="types-grid">
-      <type-card wx:for="{{types}}" wx:key="code" type="{{item}}" />
+      <view wx:for="{{types}}" wx:key="code" class="type-card" bindtap="viewType" data-code="{{item.code}}">
+        <text class="tc-emoji">{{item.emoji}}</text>
+        <text class="tc-code">{{item.code}}</text>
+        <text class="tc-name">{{item.name}}</text>
+      </view>
     </view>
   </view>
 
