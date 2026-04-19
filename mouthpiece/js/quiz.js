@@ -232,10 +232,10 @@ function shareResult() {
   } else {
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.querySelector('.btn-share');
-      const orig = btn.textContent;
+      const origHTML = btn.innerHTML;
       btn.textContent = '已复制到剪贴板！';
-      setTimeout(() => { btn.textContent = orig; }, 2000);
-    });
+      setTimeout(() => { btn.innerHTML = origHTML; }, 2000);
+    }).catch(() => {});
   }
 }
 

@@ -186,7 +186,7 @@ const SBTI_TYPES = [
     tagline: '这个好火啊！我也要试试！',
     desc: '互联网上火什么你就玩什么。MBTI火了你测了，SBTI火了你也测了，互联网嘴替测试火了你还是测了（对，就是现在）。你不是没有主见，你只是觉得大家都在玩的东西一定有它好玩的道理。你的手机里有37个最近一周下载的App，其中35个下周就会被卸载。',
     traits: ['追热点', '跟风达人', '尝鲜爱好者', 'App囤积症'],
-    pattern: { melonEating:'H', shareDesire:'H', platformLoyalty:'L', onlinePersona:'L', opinionStrength:'L' },
+    pattern: { melonEating:'H', shareDesire:'H', platformLoyalty:'H', onlinePersona:'L', opinionStrength:'L' },
     group: 'spectator'
   },
   {
