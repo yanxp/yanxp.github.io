@@ -1,0 +1,21 @@
+{
+  "description": "互联网嘴替测试 — 你是哪种网络人格？",
+  "packOptions": { "ignore": [], "include": [] },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "preloadBackgroundData": false,
+    "minified": true,
+    "newFeature": true,
+    "autoAudits": false,
+    "checkSiteMap": true,
+    "babelSetting": { "ignore": [], "disablePlugins": [], "outputPath": "" }
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.7.3",
+  "appid": "your-appid-here",
+  "projectname": "mouthpiece-miniprogram",
+  "condition": {}
+}
