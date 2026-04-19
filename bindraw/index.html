@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bindraw — 前置摄像头识别与画板</title>
+    <meta name="description" content="基于 TensorFlow.js 的前置摄像头实时物体识别 + HTML5 Canvas 画板。" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <header class="app-header">
+        <h1 class="app-title">Bindraw</h1>
+        <p class="app-subtitle">前置摄像头实时识别 &amp; 手动画板</p>
+    </header>
+
+    <nav class="toolbar" aria-label="画板工具栏">
+        <div class="tool-group">
+            <button type="button" id="tool-pen" class="tool-btn active" title="画笔" aria-pressed="true">✏️ 画笔</button>
+            <button type="button" id="tool-eraser" class="tool-btn" title="橡皮擦" aria-pressed="false">🧽 橡皮擦</button>
+        </div>
+
+        <div class="tool-group">
+            <label class="tool-label" for="color-picker">颜色</label>
+            <input type="color" id="color-picker" value="#222222" />
+        </div>
+
+        <div class="tool-group">
+            <label class="tool-label" for="size-slider">粗细 <span id="size-value">4</span>px</label>
+            <input type="range" id="size-slider" min="1" max="60" value="4" />
+        </div>
+
+        <div class="tool-group">
+            <button type="button" id="btn-undo" class="tool-btn" title="撤销">↶ 撤销</button>
+            <button type="button" id="btn-redo" class="tool-btn" title="重做">↷ 重做</button>
+        </div>
+
+        <div class="tool-group">
+            <button type="button" id="btn-clear" class="tool-btn danger" title="清空画布">🗑 清空</button>
+            <button type="button" id="btn-capture" class="tool-btn primary" title="将摄像头当前帧导入画板">📷 截图到画板</button>
+            <button type="button" id="btn-save" class="tool-btn primary" title="保存为 PNG">💾 保存图片</button>
+        </div>
+    </nav>
+
+    <main class="workspace">
+        <section class="panel panel-camera" aria-label="摄像头识别区域">
+            <header class="panel-header">
+                <h2>摄像头识别</h2>
+                <span id="camera-status" class="status">初始化中…</span>
+            </header>
+            <div class="camera-stage">
+                <video id="camera-video" autoplay playsinline muted></video>
+                <canvas id="camera-overlay"></canvas>
+            </div>
+        </section>
+
+        <section class="panel panel-draw" aria-label="画板区域">
+            <header class="panel-header">
+                <h2>画板</h2>
+                <span id="draw-status" class="status">准备就绪</span>
+            </header>
+            <div class="draw-stage">
+                <canvas id="draw-canvas"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <small>由 TensorFlow.js (coco-ssd) 与 HTML5 Canvas API 驱动 · 建议在 HTTPS 环境下使用</small>
+    </footer>
+
+    <!-- TensorFlow.js + coco-ssd (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+    <!-- 应用脚本 -->
+    <script src="js/camera.js"></script>
+    <script src="js/bindraw.js"></script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+:root {
+    --bg: #f5f6f8;
+    --panel-bg: #ffffff;
+    --border: #e2e4ea;
+    --text: #1f2430;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    --radius: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.app-header {
+    text-align: center;
+    padding: 20px 16px 8px;
+}
+
+.app-title {
+    margin: 0;
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+}
+
+.app-subtitle {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    background: var(--panel-bg);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: var(--shadow);
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tool-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.tool-btn {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    user-select: none;
+}
+
+.tool-btn:hover {
+    background: #f0f2f7;
+}
+
+.tool-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.tool-btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.tool-btn.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.tool-btn.danger {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: #fff;
+}
+
+.tool-btn.danger:hover {
+    background: var(--danger);
+    color: #fff;
+}
+
+input[type="color"] {
+    width: 38px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+}
+
+input[type="range"] {
+    width: 140px;
+}
+
+.workspace {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfd;
+}
+
+.panel-header h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.status {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.camera-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #000;
+}
+
+.camera-stage video,
+.camera-stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 前置摄像头镜像，更符合用户直觉 */
+    transform: scaleX(-1);
+}
+
+.draw-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background:
+        linear-gradient(45deg, #f0f0f3 25%, transparent 25%) 0 0 / 20px 20px,
+        linear-gradient(-45deg, #f0f0f3 25%, transparent 25%) 0 0 / 20px 20px,
+        linear-gradient(45deg, transparent 75%, #f0f0f3 75%) 0 0 / 20px 20px,
+        linear-gradient(-45deg, transparent 75%, #f0f0f3 75%) 0 0 / 20px 20px,
+        #ffffff;
+}
+
+.draw-stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.app-footer {
+    text-align: center;
+    color: var(--muted);
+    padding: 16px;
+}
+
+/* 移动端 / 窄屏：上下堆叠 */
+@media (max-width: 900px) {
+    .workspace {
+        grid-template-columns: 1fr;
+    }
+
+    input[type="range"] {
+        width: 110px;
+    }
+
+    .app-title {
+        font-size: 1.5rem;
+    }
+
+    .toolbar {
+        gap: 8px 12px;
+        padding: 10px 8px;
+    }
+
+    .tool-btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #15171c;
+        --panel-bg: #1e2128;
+        --border: #2c2f38;
+        --text: #e6e8ef;
+        --muted: #9aa3b2;
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .tool-btn {
+        background: #262932;
+        color: var(--text);
+    }
+
+    .tool-btn:hover {
+        background: #2f333d;
+    }
+
+    .panel-header {
+        background: #23262e;
+    }
+
+    .draw-stage {
+        background:
+            linear-gradient(45deg, #2a2d36 25%, transparent 25%) 0 0 / 20px 20px,
+            linear-gradient(-45deg, #2a2d36 25%, transparent 25%) 0 0 / 20px 20px,
+            linear-gradient(45deg, transparent 75%, #2a2d36 75%) 0 0 / 20px 20px,
+            linear-gradient(-45deg, transparent 75%, #2a2d36 75%) 0 0 / 20px 20px,
+            #1e2128;
+    }
+}
