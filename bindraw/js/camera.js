@@ -2,13 +2,15 @@
  * camera.js — 前置摄像头采集 + MediaPipe Hands 手势识别
  *
  * - 通过 getUserMedia 获取前置摄像头画面
- * - 使用 @tensorflow-models/hand-pose-detection (MediaPipe Hands, tfjs runtime)
- *   检测手部 21 个关键点
+ * - 使用 @tensorflow-models/hand-pose-detection 检测手部 21 个关键点
+ *   优先 mediapipe runtime（更稳定），失败时回退到 tfjs runtime
  * - 基于手指伸展状态做轻量启发式手势分类
  * - 在覆盖 canvas 上绘制骨架与指尖光标
- * - 通过回调将 { gesture, fingertip, raw } 广播给画板模块
+ * - 通过回调将 { gesture, fingertip } 广播给画板模块
  *
- * 导出：window.BindrawCamera = { init, captureFrame, onGesture, setEnabled }
+ * 导出：window.BindrawCamera = {
+ *   init, captureFrame, onGesture, setEnabled, isEnabled, setShowSkeleton, setVisible
+ * }
  */
 (function () {
     'use strict';
@@ -18,7 +20,13 @@
     const statusEl = document.getElementById('camera-status');
     const emojiEl = document.getElementById('gesture-emoji');
     const nameEl = document.getElementById('gesture-name');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingTitle = document.getElementById('loading-title');
+    const loadingSub = document.getElementById('loading-sub');
+    const readyBanner = document.getElementById('ready-banner');
+    const readyBannerSub = document.getElementById('ready-banner-sub');
     const overlayCtx = overlayEl.getContext('2d');
+    const originalTitle = document.title;
 
     // MediaPipe Hands 骨架连接
     const HAND_CONNECTIONS = [
@@ -40,15 +48,53 @@
         none:      { emoji: '🖐', name: '等待手势' }
     };
 
+    // 放宽后的手指伸展阈值（tip 到 MCP 的距离 / PIP 到 MCP 的距离）
+    // 之前 1.6 过于严格，很多自然姿态下的食指也被判成收起
+    const FINGER_EXTEND_RATIO = 1.35;
+    const THUMB_EXTEND_RATIO = 1.05;
+
     let detector = null;
     let stream = null;
     let running = false;
     let enabled = true;
-    let lastFrame = null; // 最近一帧识别结果
+    let showSkeleton = true;
     const listeners = [];
+
+    // 节流诊断日志（每 ~30 帧打印一次）
+    let frameCount = 0;
 
     function setStatus(text) {
         if (statusEl) statusEl.textContent = text;
+    }
+
+    function setLoading(visible, title, sub) {
+        if (!loadingOverlay) return;
+        if (title && loadingTitle) loadingTitle.textContent = title;
+        if (sub && loadingSub) loadingSub.textContent = sub;
+        if (visible) {
+            loadingOverlay.classList.remove('hidden');
+        } else {
+            loadingOverlay.classList.add('hidden');
+        }
+    }
+
+    let readyFired = false;
+    function showReadyBanner() {
+        if (readyFired || !readyBanner) return;
+        readyFired = true;
+        readyBanner.hidden = false;
+        // 强制一次回流以触发 transition
+        // eslint-disable-next-line no-unused-expressions
+        readyBanner.offsetHeight;
+        readyBanner.classList.add('show');
+        document.title = '✅ 就绪 — ' + originalTitle;
+        if (readyBannerSub) {
+            readyBannerSub.textContent = '竖起食指即可开始作画';
+        }
+        setTimeout(() => {
+            readyBanner.classList.remove('show');
+            setTimeout(() => { readyBanner.hidden = true; }, 400);
+        }, 2800);
     }
 
     function updateGestureBadge(gesture) {
@@ -66,21 +112,18 @@
     /**
      * 基于 21 个关键点判断每根手指是否伸展。
      * 约定 [thumb, index, middle, ring, pinky]，1 表示伸展。
-     *
-     * 对食指/中指/无名指/小指：tip 到对应 MCP 的距离显著大于 PIP 到 MCP 的距离
-     * 对拇指：tip 到 CMC 的距离显著大于 IP 到 CMC 的距离
      */
     function fingersUp(kp) {
         const thumbExtended =
-            dist(kp[4], kp[1]) > dist(kp[3], kp[1]) * 1.15;
+            dist(kp[4], kp[2]) > dist(kp[3], kp[2]) * THUMB_EXTEND_RATIO;
         const indexExtended =
-            dist(kp[8], kp[5]) > dist(kp[6], kp[5]) * 1.6;
+            dist(kp[8], kp[5]) > dist(kp[6], kp[5]) * FINGER_EXTEND_RATIO;
         const middleExtended =
-            dist(kp[12], kp[9]) > dist(kp[10], kp[9]) * 1.6;
+            dist(kp[12], kp[9]) > dist(kp[10], kp[9]) * FINGER_EXTEND_RATIO;
         const ringExtended =
-            dist(kp[16], kp[13]) > dist(kp[14], kp[13]) * 1.6;
+            dist(kp[16], kp[13]) > dist(kp[14], kp[13]) * FINGER_EXTEND_RATIO;
         const pinkyExtended =
-            dist(kp[20], kp[17]) > dist(kp[18], kp[17]) * 1.6;
+            dist(kp[20], kp[17]) > dist(kp[18], kp[17]) * FINGER_EXTEND_RATIO;
         return [
             thumbExtended ? 1 : 0,
             indexExtended ? 1 : 0,
@@ -94,39 +137,42 @@
      * 将 fingersUp 结果与几个额外几何特征组合，分类为命名手势。
      */
     function classifyGesture(kp) {
-        const [t, i, m, r, p] = fingersUp(kp);
+        const fingers = fingersUp(kp);
+        const [t, i, m, r, p] = fingers;
+        const extCount = t + i + m + r + p;
 
-        // 用掌心大小作参考尺度
         const handSize = dist(kp[0], kp[9]) || 1;
 
-        // OK 手势：拇指尖与食指尖相近，且中/无名/小指伸展
+        // OK 手势：拇指尖与食指尖相近，且至少 2 根其他手指伸展
         const thumbIndexTipDist = dist(kp[4], kp[8]);
-        if (thumbIndexTipDist < handSize * 0.45 && m && r && p) {
-            return 'ok';
+        if (thumbIndexTipDist < handSize * 0.45 && (m + r + p) >= 2) {
+            return { name: 'ok', fingers };
         }
 
         const key = [t, i, m, r, p].join('');
         switch (key) {
-            case '00000': return 'fist';
-            case '11111': return 'palm';
-            case '01111': return 'palm';      // 拇指内扣的张开掌
-            case '01000': return 'point';
-            case '11000': return 'point';     // 容忍拇指偏差
-            case '01100': return 'scissors';
-            case '11100': return 'scissors';
-            case '10000': return 'thumbs_up';
-            default:
-                // 兜底：只要食指伸展且中/无名/小指大部分收起，就算指向
-                if (i && !m && !r && !p) return 'point';
-                return 'none';
+            case '00000': return { name: 'fist', fingers };
+            case '11111': return { name: 'palm', fingers };
+            case '01111': return { name: 'palm', fingers };
+            case '01000': return { name: 'point', fingers };
+            case '11000': return { name: 'point', fingers };
+            case '01100': return { name: 'scissors', fingers };
+            case '11100': return { name: 'scissors', fingers };
+            case '10000': return { name: 'thumbs_up', fingers };
         }
+        // 兜底规则
+        if (i && !m && !r && !p) return { name: 'point', fingers };
+        if (i && m && !r && !p) return { name: 'scissors', fingers };
+        if (extCount >= 4) return { name: 'palm', fingers };
+        if (extCount === 0) return { name: 'fist', fingers };
+        return { name: 'none', fingers };
     }
 
     function drawSkeleton(hand) {
+        if (!showSkeleton) return;
         const kp = hand.keypoints;
         overlayCtx.save();
 
-        // 连线
         overlayCtx.lineWidth = Math.max(2, overlayEl.width / 320);
         overlayCtx.strokeStyle = 'rgba(34, 197, 94, 0.95)';
         overlayCtx.beginPath();
@@ -136,7 +182,6 @@
         });
         overlayCtx.stroke();
 
-        // 关键点
         const r = Math.max(3, overlayEl.width / 240);
         overlayCtx.fillStyle = 'rgba(37, 99, 235, 0.95)';
         kp.forEach((pt) => {
@@ -145,40 +190,12 @@
             overlayCtx.fill();
         });
 
-        // 食指指尖特别强调
+        // 食指指尖高亮
         overlayCtx.fillStyle = '#f97316';
         overlayCtx.beginPath();
         overlayCtx.arc(kp[8].x, kp[8].y, r * 1.8, 0, Math.PI * 2);
         overlayCtx.fill();
 
-        overlayCtx.restore();
-    }
-
-    function renderGestureLabel(hand, gesture) {
-        const meta = GESTURE_META[gesture] || GESTURE_META.none;
-        const kp = hand.keypoints;
-
-        // 取手腕附近做标签位置
-        const x = Math.min(overlayEl.width - 180, Math.max(10, kp[0].x - 60));
-        const y = Math.max(36, kp[0].y + 24);
-
-        // 由于 video + overlay 通过 CSS scaleX(-1) 镜像显示，
-        // 此处把文字局部翻回去保持可读。
-        overlayCtx.save();
-        overlayCtx.translate(x + 180, y - 24);
-        overlayCtx.scale(-1, 1);
-
-        const label = `${meta.emoji}  ${meta.name}`;
-        overlayCtx.font = `600 ${Math.max(14, overlayEl.width / 38)}px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif`;
-        const w = overlayCtx.measureText(label).width + 20;
-        const h = Math.max(30, overlayEl.width / 22);
-
-        overlayCtx.fillStyle = 'rgba(17, 24, 39, 0.78)';
-        overlayCtx.fillRect(0, 0, w, h);
-
-        overlayCtx.fillStyle = '#ffffff';
-        overlayCtx.textBaseline = 'middle';
-        overlayCtx.fillText(label, 10, h / 2);
         overlayCtx.restore();
     }
 
@@ -202,36 +219,35 @@
     async function detectLoop() {
         if (!detector || !running) return;
         if (!enabled) {
-            // 手势控制被关闭：保持循环但跳过识别与绘制，下次开启能立刻恢复
             requestAnimationFrame(detectLoop);
             return;
         }
         try {
-            if (videoEl.readyState >= 2) {
+            if (videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
                 const hands = await detector.estimateHands(videoEl, { flipHorizontal: false });
                 syncOverlaySize();
                 overlayCtx.clearRect(0, 0, overlayEl.width, overlayEl.height);
 
                 if (hands && hands.length > 0) {
                     const hand = hands[0];
-                    const gesture = classifyGesture(hand.keypoints);
-                    lastFrame = { gesture, hand };
+                    const { name: gesture, fingers } = classifyGesture(hand.keypoints);
                     drawSkeleton(hand);
-                    renderGestureLabel(hand, gesture);
                     updateGestureBadge(gesture);
+                    setStatus(`识别中 · ${gesture}`);
 
-                    // 将指尖归一化到 [0, 1]，同时水平翻转以匹配镜像显示
                     const tip = hand.keypoints[8];
-                    const nx = 1 - tip.x / overlayEl.width; // 镜像
+                    const nx = 1 - tip.x / overlayEl.width; // 水平镜像，匹配 CSS scaleX(-1)
                     const ny = tip.y / overlayEl.height;
-                    notifyListeners({
-                        gesture,
-                        fingertip: { nx, ny, x: tip.x, y: tip.y },
-                        raw: hand
-                    });
+
+                    if (frameCount % 30 === 0) {
+                        console.debug('[bindraw] fingers =', fingers.join(''), 'gesture =', gesture);
+                    }
+                    frameCount += 1;
+
+                    notifyListeners({ gesture, fingertip: { nx, ny }, raw: hand });
                 } else {
-                    lastFrame = null;
                     updateGestureBadge('none');
+                    setStatus('识别中 · 未检测到手');
                     notifyListeners({ gesture: 'none', fingertip: null, raw: null });
                 }
             }
@@ -244,9 +260,11 @@
     async function initCamera() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             setStatus('当前浏览器不支持摄像头 API');
+            setLoading(true, '当前浏览器不支持摄像头 API', '请在最新 Chrome / Safari / Edge 中打开');
             return;
         }
 
+        setLoading(true, '请求摄像头权限…', '请在浏览器提示中选择「允许」');
         setStatus('请求摄像头权限…');
         try {
             stream = await navigator.mediaDevices.getUserMedia({
@@ -259,15 +277,20 @@
             });
         } catch (err) {
             console.error('[bindraw] getUserMedia failed', err);
-            let message = '无法访问摄像头';
+            let message = '无法访问摄像头：' + (err && err.name ? err.name : 'UnknownError');
+            let sub = '请刷新页面或检查系统相机权限';
             if (err && err.name === 'NotAllowedError') {
-                message = '摄像头权限被拒绝，请在浏览器设置中允许后刷新页面';
+                message = '摄像头权限被拒绝';
+                sub = '请在浏览器地址栏的权限设置中允许摄像头后刷新页面';
             } else if (err && err.name === 'NotFoundError') {
                 message = '未检测到可用摄像头';
-            } else if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-                message = '请在 HTTPS 或 localhost 下访问以启用摄像头';
+                sub = '请确认摄像头已连接并未被其他应用占用';
+            } else if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                message = '请在 HTTPS 或 localhost 下访问';
+                sub = '浏览器仅在安全上下文下允许访问摄像头';
             }
             setStatus(message);
+            setLoading(true, message, sub);
             return;
         }
 
@@ -283,24 +306,65 @@
         }
         syncOverlaySize();
 
-        setStatus('加载手势识别模型…');
-        try {
-            if (!window.handPoseDetection) {
-                throw new Error('handPoseDetection 未加载');
-            }
-            detector = await window.handPoseDetection.createDetector(
-                window.handPoseDetection.SupportedModels.MediaPipeHands,
-                { runtime: 'tfjs', modelType: 'full', maxHands: 1 }
-            );
-        } catch (err) {
-            console.error('[bindraw] hand model load failed', err);
-            setStatus('手势模型加载失败（画板仍可用）');
-            return;
-        }
+        setLoading(true, '加载手势识别模型…', '首屏约需下载 2–5 MB，通常 2–10 秒');
+        await loadDetector();
 
-        setStatus('识别中');
+        if (!detector) return;
+
+        setStatus('✅ 就绪 · 请把手伸到摄像头前');
+        setLoading(false);
+        showReadyBanner();
         running = true;
         detectLoop();
+    }
+
+    async function loadDetector() {
+        if (!window.handPoseDetection) {
+            setStatus('hand-pose-detection 未加载，检查网络');
+            setLoading(true, '手势识别脚本加载失败', '请检查网络后刷新页面');
+            console.error('[bindraw] handPoseDetection global missing');
+            return;
+        }
+        const hpd = window.handPoseDetection;
+
+        // 先试 mediapipe runtime（更稳定、更快），失败回退 tfjs
+        const attempts = [
+            {
+                name: 'mediapipe',
+                config: {
+                    runtime: 'mediapipe',
+                    modelType: 'full',
+                    maxHands: 1,
+                    solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands'
+                }
+            },
+            {
+                name: 'tfjs(lite)',
+                config: { runtime: 'tfjs', modelType: 'lite', maxHands: 1 }
+            },
+            {
+                name: 'tfjs(full)',
+                config: { runtime: 'tfjs', modelType: 'full', maxHands: 1 }
+            }
+        ];
+
+        for (const attempt of attempts) {
+            setStatus(`加载手势识别模型（${attempt.name}）…`);
+            setLoading(true, `加载手势识别模型（${attempt.name}）…`, '首屏约需下载 2–5 MB，通常 2–10 秒');
+            try {
+                detector = await hpd.createDetector(
+                    hpd.SupportedModels.MediaPipeHands,
+                    attempt.config
+                );
+                console.info(`[bindraw] detector loaded via ${attempt.name}`);
+                return;
+            } catch (err) {
+                console.warn(`[bindraw] detector ${attempt.name} failed`, err);
+            }
+        }
+        detector = null;
+        setStatus('手势模型加载失败，请检查网络后刷新');
+        setLoading(true, '手势模型加载失败', '请检查网络后刷新页面');
     }
 
     /**
@@ -331,9 +395,23 @@
         if (!enabled) {
             overlayCtx.clearRect(0, 0, overlayEl.width, overlayEl.height);
             updateGestureBadge('none');
-            // 通知一次 none 让画板复位
             notifyListeners({ gesture: 'none', fingertip: null, raw: null, disabled: true });
+            setStatus('手势控制已关闭');
+        } else {
+            setStatus('识别中');
         }
+    }
+
+    function setShowSkeleton(flag) {
+        showSkeleton = !!flag;
+        if (!showSkeleton) {
+            overlayCtx.clearRect(0, 0, overlayEl.width, overlayEl.height);
+        }
+    }
+
+    function setVisible(flag) {
+        videoEl.style.visibility = flag ? 'visible' : 'hidden';
+        overlayEl.style.visibility = flag ? 'visible' : 'hidden';
     }
 
     function isEnabled() {
@@ -345,7 +423,9 @@
         captureFrame,
         onGesture,
         setEnabled,
-        isEnabled
+        isEnabled,
+        setShowSkeleton,
+        setVisible
     };
 
     if (document.readyState === 'loading') {

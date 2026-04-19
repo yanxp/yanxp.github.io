@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bindraw — 手势识别画图</title>
-    <meta name="description" content="基于 TensorFlow.js + MediaPipe Hands 的前置摄像头手势识别画图工具。" />
+    <meta name="description" content="基于 TensorFlow.js + MediaPipe Hands 的前置摄像头手势识别画图工具。指尖即画笔，直接在摄像头画面上作画。" />
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
     <header class="app-header">
         <h1 class="app-title">Bindraw</h1>
-        <p class="app-subtitle">前置摄像头手势识别 · 指尖画图</p>
+        <p class="app-subtitle">前置摄像头手势识别 · 指尖即画笔</p>
     </header>
 
     <nav class="toolbar" aria-label="画板工具栏">
@@ -36,7 +36,6 @@
 
         <div class="tool-group">
             <button type="button" id="btn-clear" class="tool-btn danger" title="清空画布">🗑 清空</button>
-            <button type="button" id="btn-capture" class="tool-btn" title="将摄像头当前帧导入画板">📷 截图到画板</button>
             <button type="button" id="btn-save" class="tool-btn primary" title="保存为 PNG">💾 保存图片</button>
         </div>
 
@@ -45,54 +44,78 @@
                 <input type="checkbox" id="gesture-toggle" checked />
                 <span>手势控制</span>
             </label>
+            <label class="tool-label toggle-label">
+                <input type="checkbox" id="camera-toggle" checked />
+                <span>显示摄像头</span>
+            </label>
+            <label class="tool-label toggle-label">
+                <input type="checkbox" id="skeleton-toggle" checked />
+                <span>显示骨架</span>
+            </label>
         </div>
     </nav>
 
     <main class="workspace">
-        <section class="panel panel-camera" aria-label="摄像头识别区域">
-            <header class="panel-header">
-                <h2>摄像头 / 手势识别</h2>
+        <section class="stage" aria-label="摄像头 + 画布">
+            <video id="camera-video" autoplay playsinline muted></video>
+            <canvas id="camera-overlay" aria-hidden="true"></canvas>
+            <canvas id="draw-canvas" aria-label="画布"></canvas>
+            <div class="cursor-indicator" id="cursor-indicator" aria-hidden="true"></div>
+
+            <div class="gesture-badge">
+                <span class="gesture-emoji" id="gesture-emoji">🖐</span>
+                <span class="gesture-name" id="gesture-name">等待手势</span>
+            </div>
+
+            <div class="status-bar">
                 <span id="camera-status" class="status">初始化中…</span>
-            </header>
-            <div class="camera-stage">
-                <video id="camera-video" autoplay playsinline muted></video>
-                <canvas id="camera-overlay"></canvas>
-                <div class="gesture-badge">
-                    <span class="gesture-emoji" id="gesture-emoji">🖐</span>
-                    <span class="gesture-name" id="gesture-name">等待手势</span>
+                <span id="draw-status" class="status subtle">准备就绪</span>
+            </div>
+
+            <div class="ready-banner" id="ready-banner" role="status" aria-live="polite" hidden>
+                <span class="ready-banner-emoji">✅</span>
+                <div class="ready-banner-text">
+                    <strong id="ready-banner-title">准备就绪</strong>
+                    <span id="ready-banner-sub">竖起食指即可开始作画</span>
                 </div>
             </div>
-            <aside class="legend" aria-label="手势控制图例">
-                <h3>手势控制</h3>
-                <ul>
-                    <li><span class="legend-emoji">☝️</span> 食指指向 — 下笔作画</li>
-                    <li><span class="legend-emoji">✊</span> 握拳 — 抬笔（暂停）</li>
-                    <li><span class="legend-emoji">✋</span> 张开手掌 — 橡皮擦</li>
-                    <li><span class="legend-emoji">✌️</span> 剪刀手 — 撤销（保持 ~0.5s）</li>
-                    <li><span class="legend-emoji">👍</span> 点赞 — 保存 PNG</li>
-                    <li><span class="legend-emoji">👌</span> OK — 清空画布</li>
-                </ul>
-            </aside>
-        </section>
 
-        <section class="panel panel-draw" aria-label="画板区域">
-            <header class="panel-header">
-                <h2>画板</h2>
-                <span id="draw-status" class="status">准备就绪</span>
-            </header>
-            <div class="draw-stage">
-                <canvas id="draw-canvas"></canvas>
-                <div class="cursor-indicator" id="cursor-indicator" aria-hidden="true"></div>
+            <div class="loading-overlay" id="loading-overlay" aria-live="polite">
+                <div class="loading-card">
+                    <div class="loading-spinner" aria-hidden="true"></div>
+                    <div class="loading-title" id="loading-title">正在加载手势识别模型…</div>
+                    <div class="loading-sub" id="loading-sub">首屏约需下载 2–5 MB 模型（2–10 秒，视网络而定）</div>
+                </div>
             </div>
+
+            <aside class="legend" aria-label="手势控制图例">
+                <button type="button" id="legend-toggle" class="legend-toggle" aria-expanded="true">手势说明</button>
+                <div class="legend-body" id="legend-body">
+                    <ul>
+                        <li><span class="legend-emoji">☝️</span> 食指 — 下笔作画</li>
+                        <li><span class="legend-emoji">✊</span> 握拳 — 抬笔</li>
+                        <li><span class="legend-emoji">✋</span> 手掌 — 橡皮擦</li>
+                        <li><span class="legend-emoji">✌️</span> 剪刀 — 撤销（保持 ~0.5s）</li>
+                        <li><span class="legend-emoji">👍</span> 点赞 — 保存 PNG</li>
+                        <li><span class="legend-emoji">👌</span> OK — 清空画布</li>
+                    </ul>
+                </div>
+            </aside>
         </section>
     </main>
 
     <footer class="app-footer">
-        <small>由 TensorFlow.js + MediaPipe Hands 与 HTML5 Canvas API 驱动 · 建议在 HTTPS 环境下使用</small>
+        <small>TensorFlow.js + MediaPipe Hands · 建议在 HTTPS / localhost 下使用（摄像头 API 需要安全上下文）</small>
     </footer>
 
-    <!-- TensorFlow.js + hand-pose-detection (MediaPipe Hands, tfjs runtime) -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!--
+        TensorFlow.js core + hand-pose-detection.
+        额外预加载 @mediapipe/hands 资源包，允许使用更稳定的 mediapipe runtime。
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
 
     <!-- 应用脚本 -->

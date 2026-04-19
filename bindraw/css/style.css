@@ -1,6 +1,6 @@
 :root {
-    --bg: #f5f6f8;
-    --panel-bg: #ffffff;
+    --bg: #0b0d12;
+    --panel-bg: rgba(255, 255, 255, 0.92);
     --border: #e2e4ea;
     --text: #1f2430;
     --muted: #6b7280;
@@ -8,7 +8,7 @@
     --accent-hover: #1d4ed8;
     --danger: #dc2626;
     --danger-hover: #b91c1c;
-    --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
     --radius: 10px;
 }
 
@@ -24,24 +24,32 @@ body {
         "Microsoft YaHei", sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
 }
 
 .app-header {
     text-align: center;
-    padding: 20px 16px 8px;
+    padding: 10px 16px 4px;
+    color: #f3f4f6;
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .app-title {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 1.25rem;
     letter-spacing: 0.5px;
 }
 
 .app-subtitle {
-    margin: 4px 0 0;
-    color: var(--muted);
-    font-size: 0.95rem;
+    margin: 2px 0 0;
+    color: #9ca3af;
+    font-size: 0.85rem;
 }
 
 .toolbar {
@@ -50,14 +58,12 @@ body {
     gap: 10px 18px;
     align-items: center;
     justify-content: center;
-    padding: 12px 16px;
+    padding: 10px 14px;
     background: var(--panel-bg);
-    border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 10;
     box-shadow: var(--shadow);
+    backdrop-filter: blur(6px);
+    z-index: 10;
 }
 
 .tool-group {
@@ -129,78 +135,6 @@ input[type="range"] {
     width: 140px;
 }
 
-.workspace {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    padding: 16px;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.panel {
-    background: var(--panel-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    background: #fafbfd;
-}
-
-.panel-header h2 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.status {
-    font-size: 0.8rem;
-    color: var(--muted);
-}
-
-.panel-header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.mode-switch {
-    display: inline-flex;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    overflow: hidden;
-    background: #fff;
-}
-
-.mode-btn {
-    border: 0;
-    background: transparent;
-    color: var(--text);
-    padding: 4px 12px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-}
-
-.mode-btn + .mode-btn {
-    border-left: 1px solid var(--border);
-}
-
-.mode-btn.active {
-    background: var(--accent);
-    color: #fff;
-}
-
 .toggle-label {
     display: inline-flex;
     align-items: center;
@@ -211,101 +145,23 @@ input[type="range"] {
     font-size: 0.9rem;
 }
 
-.gesture-badge {
-    position: absolute;
-    left: 12px;
-    top: 12px;
-    z-index: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: rgba(17, 24, 39, 0.72);
-    color: #fff;
-    font-size: 0.9rem;
-    backdrop-filter: blur(4px);
-    pointer-events: none;
-}
+/* ---------- 主工作区 ---------- */
 
-.gesture-emoji {
-    font-size: 1.1rem;
-    line-height: 1;
-}
-
-.gesture-name {
-    font-weight: 600;
-}
-
-.legend {
-    border-top: 1px solid var(--border);
-    padding: 10px 14px;
-    background: #fafbfd;
-    font-size: 0.85rem;
-    color: var(--text);
-}
-
-.legend h3 {
-    margin: 0 0 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.legend ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px 14px;
-}
-
-.legend li {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    line-height: 1.4;
-}
-
-.legend-emoji {
-    font-size: 1rem;
-}
-
-.cursor-indicator {
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    transition: opacity 0.1s ease;
-    opacity: 0;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
-    z-index: 2;
-}
-
-.cursor-indicator::after {
-    content: '';
-    position: absolute;
-    inset: 8px;
-    border-radius: 50%;
-    background: currentColor;
-    color: inherit;
-}
-
-.camera-stage {
+.workspace {
+    flex: 1 1 auto;
     position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
+    overflow: hidden;
     background: #000;
 }
 
-.camera-stage video,
-.camera-stage canvas {
+.stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.stage video,
+.stage #camera-overlay {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -313,68 +169,294 @@ input[type="range"] {
     object-fit: cover;
     /* 前置摄像头镜像，更符合用户直觉 */
     transform: scaleX(-1);
+    z-index: 0;
 }
 
-.draw-stage {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    background:
-        linear-gradient(45deg, #f0f0f3 25%, transparent 25%) 0 0 / 20px 20px,
-        linear-gradient(-45deg, #f0f0f3 25%, transparent 25%) 0 0 / 20px 20px,
-        linear-gradient(45deg, transparent 75%, #f0f0f3 75%) 0 0 / 20px 20px,
-        linear-gradient(-45deg, transparent 75%, #f0f0f3 75%) 0 0 / 20px 20px,
-        #ffffff;
+.stage #camera-overlay {
+    z-index: 1;
+    pointer-events: none;
 }
 
-.draw-stage canvas {
+.stage #draw-canvas {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     cursor: crosshair;
     touch-action: none;
+    background: transparent;
+    z-index: 2;
+}
+
+/* ---------- 状态 / 手势徽章 / 图例 ---------- */
+
+.gesture-badge {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.72);
+    color: #fff;
+    font-size: 0.95rem;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+}
+
+.gesture-emoji {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.gesture-name {
+    font-weight: 600;
+}
+
+.status-bar {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    z-index: 5;
+    display: flex;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(17, 24, 39, 0.7);
+    color: #fff;
+    font-size: 0.82rem;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+}
+
+.status.subtle {
+    color: #cbd5e1;
+}
+
+.legend {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    z-index: 5;
+    background: rgba(17, 24, 39, 0.72);
+    color: #fff;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    padding: 8px 12px;
+    max-width: 260px;
+    font-size: 0.85rem;
+}
+
+.legend-toggle {
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0 0 6px;
+    letter-spacing: 0.3px;
+    width: 100%;
+    text-align: left;
+}
+
+.legend-body ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+}
+
+.legend-body li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.35;
+}
+
+.legend-emoji {
+    font-size: 1.05rem;
+    width: 1.4em;
+    text-align: center;
+}
+
+/* ---------- 加载遮罩 + 就绪横幅 ---------- */
+
+.loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 8, 14, 0.72);
+    color: #fff;
+    backdrop-filter: blur(6px);
+    transition: opacity 0.4s ease;
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 28px 40px;
+    border-radius: 14px;
+    background: rgba(17, 24, 39, 0.85);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    text-align: center;
+    max-width: 90vw;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.15);
+    border-top-color: #60a5fa;
+    animation: bindraw-spin 1s linear infinite;
+}
+
+@keyframes bindraw-spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.loading-sub {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+}
+
+.ready-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 26px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.96), rgba(16, 185, 129, 0.96));
+    color: #fff;
+    box-shadow: 0 12px 36px rgba(16, 185, 129, 0.45);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    max-width: 90vw;
+}
+
+.ready-banner.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.ready-banner-emoji {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.ready-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ready-banner-text strong {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.ready-banner-text span {
+    font-size: 0.88rem;
+    opacity: 0.95;
+}
+
+.cursor-indicator {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+    opacity: 0;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+    z-index: 3;
+}
+
+.cursor-indicator::after {
+    content: '';
+    position: absolute;
+    inset: 9px;
+    border-radius: 50%;
+    background: currentColor;
+    color: inherit;
 }
 
 .app-footer {
     text-align: center;
-    color: var(--muted);
-    padding: 16px;
+    color: #9ca3af;
+    padding: 6px 16px 8px;
+    background: rgba(0, 0, 0, 0.4);
+    font-size: 0.78rem;
 }
 
-/* 移动端 / 窄屏：上下堆叠 */
-@media (max-width: 900px) {
-    .workspace {
-        grid-template-columns: 1fr;
-    }
+/* ---------- 响应式 ---------- */
 
-    input[type="range"] {
-        width: 110px;
+@media (max-width: 720px) {
+    .app-header {
+        padding: 8px 12px 2px;
     }
-
     .app-title {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
     }
-
+    .app-subtitle {
+        font-size: 0.78rem;
+    }
+    input[type="range"] {
+        width: 100px;
+    }
     .toolbar {
-        gap: 8px 12px;
-        padding: 10px 8px;
+        gap: 6px 10px;
+        padding: 8px;
     }
-
     .tool-btn {
         padding: 6px 10px;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
+    }
+    .legend {
+        right: 8px;
+        top: 8px;
+        max-width: 180px;
+        padding: 6px 10px;
+        font-size: 0.78rem;
     }
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg: #15171c;
-        --panel-bg: #1e2128;
+        --panel-bg: rgba(30, 33, 40, 0.92);
         --border: #2c2f38;
         --text: #e6e8ef;
         --muted: #9aa3b2;
-        --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
     }
 
     .tool-btn {
@@ -384,26 +466,5 @@ input[type="range"] {
 
     .tool-btn:hover {
         background: #2f333d;
-    }
-
-    .panel-header {
-        background: #23262e;
-    }
-
-    .legend {
-        background: #23262e;
-    }
-
-    .mode-switch {
-        background: #262932;
-    }
-
-    .draw-stage {
-        background:
-            linear-gradient(45deg, #2a2d36 25%, transparent 25%) 0 0 / 20px 20px,
-            linear-gradient(-45deg, #2a2d36 25%, transparent 25%) 0 0 / 20px 20px,
-            linear-gradient(45deg, transparent 75%, #2a2d36 75%) 0 0 / 20px 20px,
-            linear-gradient(-45deg, transparent 75%, #2a2d36 75%) 0 0 / 20px 20px,
-            #1e2128;
     }
 }

@@ -1,9 +1,10 @@
 /**
  * bindraw.js — 画板 + 手势驱动逻辑
  *
- * - 提供鼠标 / 触屏的基础画板操作（画笔、橡皮擦、颜色、粗细、撤销、重做、
- *   清空、摄像头截图导入、保存 PNG）
- * - 订阅 window.BindrawCamera 的手势事件，基于手势驱动画笔：
+ * 画布直接覆盖在摄像头画面上（透明背景），指到哪里画到哪里。
+ *
+ * - 鼠标 / 触屏：画笔、橡皮擦、颜色、粗细、撤销、重做、清空、保存 PNG
+ * - 手势驱动（订阅 window.BindrawCamera 的手势事件）：
  *     ☝️ point     → 下笔，以指尖位置连续作画
  *     ✊ fist      → 抬笔（仅显示光标）
  *     ✋ palm      → 橡皮擦
@@ -24,17 +25,18 @@
     const btnUndo = document.getElementById('btn-undo');
     const btnRedo = document.getElementById('btn-redo');
     const btnClear = document.getElementById('btn-clear');
-    const btnCapture = document.getElementById('btn-capture');
     const btnSave = document.getElementById('btn-save');
     const colorInput = document.getElementById('color-picker');
     const sizeSlider = document.getElementById('size-slider');
     const sizeValue = document.getElementById('size-value');
     const gestureToggle = document.getElementById('gesture-toggle');
+    const cameraToggle = document.getElementById('camera-toggle');
+    const skeletonToggle = document.getElementById('skeleton-toggle');
+    const legendToggle = document.getElementById('legend-toggle');
+    const legendBody = document.getElementById('legend-body');
 
     const MAX_HISTORY = 40;
-    // 持续手势触发动作所需帧数（约 500ms @ 30fps）
-    const TRIGGER_HOLD_FRAMES = 15;
-    // 触发后的冷却，防止重复
+    const TRIGGER_HOLD_FRAMES = 15;   // ~500ms @ 30fps
     const TRIGGER_COOLDOWN_MS = 1200;
 
     const state = {
@@ -46,7 +48,6 @@
         lastY: 0,
         history: [],
         redoStack: [],
-        // 手势相关
         gestureDrawing: false,
         gestureErasing: false,
         smoothX: null,
@@ -77,8 +78,8 @@
         canvas.width = newW;
         canvas.height = newH;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 画布透明，不填充背景色（让摄像头画面透出来）
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (snapshot) {
             ctx.drawImage(snapshot, 0, 0, snapshot.width, snapshot.height, 0, 0, canvas.width, canvas.height);
         }
@@ -104,8 +105,6 @@
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 ctx.restore();
                 resolve();
@@ -141,8 +140,7 @@
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.restore();
         saveHistory();
         setStatus('画布已清空');
@@ -223,35 +221,6 @@
 
     // ---------- 其它操作 ----------
 
-    function captureToBoard() {
-        if (!window.BindrawCamera || typeof window.BindrawCamera.captureFrame !== 'function') {
-            setStatus('摄像头模块不可用');
-            return;
-        }
-        const frame = window.BindrawCamera.captureFrame();
-        if (!frame) {
-            setStatus('摄像头尚未就绪');
-            return;
-        }
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const srcW = frame.width;
-        const srcH = frame.height;
-        const dstW = canvas.width;
-        const dstH = canvas.height;
-        const scale = Math.max(dstW / srcW, dstH / srcH);
-        const drawW = srcW * scale;
-        const drawH = srcH * scale;
-        ctx.drawImage(frame.canvas, 0, 0, srcW, srcH,
-            (dstW - drawW) / 2, (dstH - drawH) / 2, drawW, drawH);
-        ctx.restore();
-        saveHistory();
-        setStatus('已将摄像头画面导入画板');
-    }
-
     function savePng() {
         canvas.toBlob((blob) => {
             if (!blob) { setStatus('保存失败'); return; }
@@ -291,7 +260,6 @@
             state.smoothX = nx;
             state.smoothY = ny;
         } else {
-            // 指数移动平均，兼顾跟手与稳定
             const alpha = 0.45;
             state.smoothX = state.smoothX * (1 - alpha) + nx * alpha;
             state.smoothY = state.smoothY * (1 - alpha) + ny * alpha;
@@ -299,12 +267,16 @@
         return { nx: state.smoothX, ny: state.smoothY };
     }
 
+    function resetSmooth() {
+        state.smoothX = null;
+        state.smoothY = null;
+    }
+
     function canvasCoordFromNorm(nx, ny) {
         return { x: nx * canvas.width, y: ny * canvas.height };
     }
 
     function handleGestureTriggers(gesture) {
-        // 触发类手势（scissors / thumbs_up / ok）需持续若干帧并满足冷却
         const now = performance.now();
         if (gesture === state.heldGesture) {
             state.heldFrames += 1;
@@ -315,7 +287,6 @@
 
         const cooldownOk = now - state.lastTriggerAt > TRIGGER_COOLDOWN_MS;
         if (!cooldownOk) {
-            // 冷却期内防止 heldFrames 跨过阈值而再也无法相等；下次冷却结束时可立即触发
             if (state.heldFrames >= TRIGGER_HOLD_FRAMES) {
                 state.heldFrames = TRIGGER_HOLD_FRAMES - 1;
             }
@@ -367,8 +338,10 @@
 
     function gestureErase(nx, ny) {
         const { x, y } = canvasCoordFromNorm(nx, ny);
+        const dpr = window.devicePixelRatio || 1;
         applyStrokeStyle('eraser');
-        const r = Math.max(12, state.size * 2.5);
+        // 橡皮擦半径按 CSS 像素定义，乘 DPR 以保持视觉大小一致
+        const r = Math.max(12, state.size * 2.5) * dpr;
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();
@@ -399,13 +372,13 @@
             state.activeGesture = 'none';
             state.heldGesture = null;
             state.heldFrames = 0;
+            resetSmooth();
             updateCursor(0, 0, false);
             return;
         }
 
         const { nx, ny } = smoothPos(fingertip.nx, fingertip.ny);
 
-        // 触发类动作（仅在进入该手势时计数）
         handleGestureTriggers(gesture);
 
         if (gesture === 'point') {
@@ -424,20 +397,26 @@
             updateCursor(nx, ny, true, '#ef4444');
             setStatus('🧽 手势擦除中');
         } else {
-            // fist / scissors / thumbs_up / ok / none — 抬笔/停擦，仅显示光标
             gesturePenUp();
             gestureEraseStop();
             updateCursor(nx, ny, true, state.color);
-            if (gesture === 'fist') setStatus('✊ 已抬笔');
-            else if (gesture === 'scissors') setStatus('✌️ 保持以撤销…');
-            else if (gesture === 'thumbs_up') setStatus('👍 保持以保存…');
-            else if (gesture === 'ok') setStatus('👌 保持以清空…');
-            else setStatus('等待手势');
+            if (gesture === 'fist') {
+                setStatus('✊ 抬笔');
+            } else if (gesture === 'scissors') {
+                setStatus('✌️ 保持剪刀手以撤销…');
+            } else if (gesture === 'thumbs_up') {
+                setStatus('👍 保持以保存 PNG…');
+            } else if (gesture === 'ok') {
+                setStatus('👌 保持以清空…');
+            } else {
+                setStatus('等待手势');
+            }
         }
+
         state.activeGesture = gesture;
     }
 
-    // ---------- 绑定事件 ----------
+    // ---------- 事件绑定 ----------
 
     function bindEvents() {
         btnPen.addEventListener('click', () => setTool('pen'));
@@ -447,72 +426,96 @@
         btnClear.addEventListener('click', () => {
             if (confirm('确定要清空画布吗？')) clearCanvas();
         });
-        btnCapture.addEventListener('click', captureToBoard);
         btnSave.addEventListener('click', savePng);
 
         colorInput.addEventListener('input', (e) => {
             state.color = e.target.value;
-            if (state.tool !== 'eraser') setTool('pen');
         });
         sizeSlider.addEventListener('input', (e) => {
             state.size = parseInt(e.target.value, 10);
             if (sizeValue) sizeValue.textContent = String(state.size);
         });
 
-        gestureToggle.addEventListener('change', (e) => {
-            const on = !!e.target.checked;
-            if (window.BindrawCamera && typeof window.BindrawCamera.setEnabled === 'function') {
-                window.BindrawCamera.setEnabled(on);
-            }
-            setStatus(on ? '手势控制已开启' : '手势控制已关闭');
-        });
-
+        // 鼠标
         canvas.addEventListener('mousedown', beginStroke);
-        window.addEventListener('mousemove', moveStroke);
+        canvas.addEventListener('mousemove', moveStroke);
         window.addEventListener('mouseup', endStroke);
+        canvas.addEventListener('mouseleave', endStroke);
 
+        // 触屏
         canvas.addEventListener('touchstart', beginStroke, { passive: false });
         canvas.addEventListener('touchmove', moveStroke, { passive: false });
         canvas.addEventListener('touchend', endStroke, { passive: false });
         canvas.addEventListener('touchcancel', endStroke, { passive: false });
 
+        // 快捷键
         window.addEventListener('keydown', (e) => {
-            const mod = e.ctrlKey || e.metaKey;
-            if (!mod) return;
-            if (e.key === 'z' || e.key === 'Z') {
-                e.preventDefault();
-                if (e.shiftKey) redo(); else undo();
-            } else if (e.key === 'y' || e.key === 'Y') {
-                e.preventDefault();
-                redo();
-            }
+            const isMod = e.ctrlKey || e.metaKey;
+            if (!isMod) return;
+            const key = e.key.toLowerCase();
+            if (key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+            else if ((key === 'z' && e.shiftKey) || key === 'y') { e.preventDefault(); redo(); }
+            else if (key === 's') { e.preventDefault(); savePng(); }
         });
 
+        // 窗口缩放
         window.addEventListener('resize', () => resizeCanvas(true));
-    }
 
-    function subscribeCamera() {
-        const tryAttach = () => {
-            if (window.BindrawCamera && typeof window.BindrawCamera.onGesture === 'function') {
-                window.BindrawCamera.onGesture(onGestureFrame);
-                return true;
-            }
-            return false;
-        };
-        if (!tryAttach()) {
-            // camera.js 可能稍后加载完成
-            const iv = setInterval(() => {
-                if (tryAttach()) clearInterval(iv);
-            }, 100);
+        // 手势控制开关 → 同步到 camera
+        if (gestureToggle) {
+            gestureToggle.addEventListener('change', (e) => {
+                if (window.BindrawCamera && typeof window.BindrawCamera.setEnabled === 'function') {
+                    window.BindrawCamera.setEnabled(e.target.checked);
+                }
+                if (!e.target.checked) {
+                    gesturePenUp();
+                    gestureEraseStop();
+                    updateCursor(0, 0, false);
+                }
+            });
+        }
+
+        // 摄像头显示开关
+        if (cameraToggle) {
+            cameraToggle.addEventListener('change', (e) => {
+                if (window.BindrawCamera && typeof window.BindrawCamera.setVisible === 'function') {
+                    window.BindrawCamera.setVisible(e.target.checked);
+                }
+            });
+        }
+
+        // 骨架显示开关
+        if (skeletonToggle) {
+            skeletonToggle.addEventListener('change', (e) => {
+                if (window.BindrawCamera && typeof window.BindrawCamera.setShowSkeleton === 'function') {
+                    window.BindrawCamera.setShowSkeleton(e.target.checked);
+                }
+            });
+        }
+
+        // 手势图例折叠
+        if (legendToggle && legendBody) {
+            legendToggle.addEventListener('click', () => {
+                const expanded = legendToggle.getAttribute('aria-expanded') === 'true';
+                legendToggle.setAttribute('aria-expanded', String(!expanded));
+                legendBody.hidden = expanded;
+            });
         }
     }
 
+    // ---------- 启动 ----------
+
     function init() {
+        setTool('pen');
         resizeCanvas(false);
         saveHistory();
         bindEvents();
-        subscribeCamera();
-        setStatus('准备就绪');
+
+        if (window.BindrawCamera && typeof window.BindrawCamera.onGesture === 'function') {
+            window.BindrawCamera.onGesture(onGestureFrame);
+        } else {
+            console.warn('[bindraw] BindrawCamera not available');
+        }
     }
 
     if (document.readyState === 'loading') {
