@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bindraw — 前置摄像头识别与画板</title>
-    <meta name="description" content="基于 TensorFlow.js 的前置摄像头实时物体识别 + HTML5 Canvas 画板。" />
+    <title>Bindraw — 手势识别画图</title>
+    <meta name="description" content="基于 TensorFlow.js + MediaPipe Hands 的前置摄像头手势识别画图工具。" />
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
     <header class="app-header">
         <h1 class="app-title">Bindraw</h1>
-        <p class="app-subtitle">前置摄像头实时识别 &amp; 手动画板</p>
+        <p class="app-subtitle">前置摄像头手势识别 · 指尖画图</p>
     </header>
 
     <nav class="toolbar" aria-label="画板工具栏">
@@ -21,12 +21,12 @@
 
         <div class="tool-group">
             <label class="tool-label" for="color-picker">颜色</label>
-            <input type="color" id="color-picker" value="#222222" />
+            <input type="color" id="color-picker" value="#2563eb" />
         </div>
 
         <div class="tool-group">
-            <label class="tool-label" for="size-slider">粗细 <span id="size-value">4</span>px</label>
-            <input type="range" id="size-slider" min="1" max="60" value="4" />
+            <label class="tool-label" for="size-slider">粗细 <span id="size-value">6</span>px</label>
+            <input type="range" id="size-slider" min="1" max="60" value="6" />
         </div>
 
         <div class="tool-group">
@@ -36,21 +36,43 @@
 
         <div class="tool-group">
             <button type="button" id="btn-clear" class="tool-btn danger" title="清空画布">🗑 清空</button>
-            <button type="button" id="btn-capture" class="tool-btn primary" title="将摄像头当前帧导入画板">📷 截图到画板</button>
+            <button type="button" id="btn-capture" class="tool-btn" title="将摄像头当前帧导入画板">📷 截图到画板</button>
             <button type="button" id="btn-save" class="tool-btn primary" title="保存为 PNG">💾 保存图片</button>
+        </div>
+
+        <div class="tool-group">
+            <label class="tool-label toggle-label">
+                <input type="checkbox" id="gesture-toggle" checked />
+                <span>手势控制</span>
+            </label>
         </div>
     </nav>
 
     <main class="workspace">
         <section class="panel panel-camera" aria-label="摄像头识别区域">
             <header class="panel-header">
-                <h2>摄像头识别</h2>
+                <h2>摄像头 / 手势识别</h2>
                 <span id="camera-status" class="status">初始化中…</span>
             </header>
             <div class="camera-stage">
                 <video id="camera-video" autoplay playsinline muted></video>
                 <canvas id="camera-overlay"></canvas>
+                <div class="gesture-badge">
+                    <span class="gesture-emoji" id="gesture-emoji">🖐</span>
+                    <span class="gesture-name" id="gesture-name">等待手势</span>
+                </div>
             </div>
+            <aside class="legend" aria-label="手势控制图例">
+                <h3>手势控制</h3>
+                <ul>
+                    <li><span class="legend-emoji">☝️</span> 食指指向 — 下笔作画</li>
+                    <li><span class="legend-emoji">✊</span> 握拳 — 抬笔（暂停）</li>
+                    <li><span class="legend-emoji">✋</span> 张开手掌 — 橡皮擦</li>
+                    <li><span class="legend-emoji">✌️</span> 剪刀手 — 撤销（保持 ~0.5s）</li>
+                    <li><span class="legend-emoji">👍</span> 点赞 — 保存 PNG</li>
+                    <li><span class="legend-emoji">👌</span> OK — 清空画布</li>
+                </ul>
+            </aside>
         </section>
 
         <section class="panel panel-draw" aria-label="画板区域">
@@ -60,17 +82,18 @@
             </header>
             <div class="draw-stage">
                 <canvas id="draw-canvas"></canvas>
+                <div class="cursor-indicator" id="cursor-indicator" aria-hidden="true"></div>
             </div>
         </section>
     </main>
 
     <footer class="app-footer">
-        <small>由 TensorFlow.js (coco-ssd) 与 HTML5 Canvas API 驱动 · 建议在 HTTPS 环境下使用</small>
+        <small>由 TensorFlow.js + MediaPipe Hands 与 HTML5 Canvas API 驱动 · 建议在 HTTPS 环境下使用</small>
     </footer>
 
-    <!-- TensorFlow.js + coco-ssd (CDN) -->
+    <!-- TensorFlow.js + hand-pose-detection (MediaPipe Hands, tfjs runtime) -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
 
     <!-- 应用脚本 -->
     <script src="js/camera.js"></script>

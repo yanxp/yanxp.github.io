@@ -168,6 +168,135 @@ input[type="range"] {
     color: var(--muted);
 }
 
+.panel-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mode-switch {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.mode-btn {
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.mode-btn + .mode-btn {
+    border-left: 1px solid var(--border);
+}
+
+.mode-btn.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+.toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.gesture-badge {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.72);
+    color: #fff;
+    font-size: 0.9rem;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+}
+
+.gesture-emoji {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.gesture-name {
+    font-weight: 600;
+}
+
+.legend {
+    border-top: 1px solid var(--border);
+    padding: 10px 14px;
+    background: #fafbfd;
+    font-size: 0.85rem;
+    color: var(--text);
+}
+
+.legend h3 {
+    margin: 0 0 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 14px;
+}
+
+.legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.4;
+}
+
+.legend-emoji {
+    font-size: 1rem;
+}
+
+.cursor-indicator {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+    opacity: 0;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+    z-index: 2;
+}
+
+.cursor-indicator::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    color: inherit;
+}
+
 .camera-stage {
     position: relative;
     width: 100%;
@@ -259,6 +388,14 @@ input[type="range"] {
 
     .panel-header {
         background: #23262e;
+    }
+
+    .legend {
+        background: #23262e;
+    }
+
+    .mode-switch {
+        background: #262932;
     }
 
     .draw-stage {
