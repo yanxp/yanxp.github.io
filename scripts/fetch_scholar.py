@@ -110,25 +110,35 @@ def main() -> int:
         # the previous scholar.json is left untouched.
         return 0
 
+    now_iso = _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
+    numbers_changed = (
+        existing.get("citations") != stats["citations"]
+        or existing.get("h_index") != stats["h_index"]
+        or existing.get("i10_index") != stats["i10_index"]
+    )
+
     out = {
         "source": PROFILE_URL,
-        "updated_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+        # `updated_at` only advances when the numbers actually move; this lets
+        # readers tell when the data last *changed* vs. when it was last fetched.
+        "updated_at": now_iso if numbers_changed else (existing.get("updated_at") or now_iso),
+        # `last_checked` always advances on a successful fetch, so a fresh value
+        # is visible even on weeks where Scholar reports the same numbers.
+        "last_checked": now_iso,
         **stats,
     }
 
-    if (
-        existing.get("citations") == out["citations"]
-        and existing.get("h_index") == out["h_index"]
-        and existing.get("i10_index") == out["i10_index"]
-    ):
-        print("[fetch_scholar] no change — skipping write")
-        return 0
-
     write_json(out)
-    print(
-        f"[fetch_scholar] updated: citations={out['citations']}, "
-        f"h-index={out['h_index']}, i10-index={out['i10_index']}"
-    )
+    if numbers_changed:
+        print(
+            f"[fetch_scholar] numbers updated: citations={out['citations']}, "
+            f"h-index={out['h_index']}, i10-index={out['i10_index']}"
+        )
+    else:
+        print(
+            f"[fetch_scholar] numbers unchanged (citations={out['citations']}); "
+            f"refreshed last_checked={now_iso}"
+        )
     return 0
 
 
