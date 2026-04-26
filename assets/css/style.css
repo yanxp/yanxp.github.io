@@ -718,6 +718,17 @@ footer a {
     color: var(--fg-muted);
 }
 
+footer .visit-stats {
+    color: var(--fg-soft);
+    white-space: nowrap;
+}
+
+footer .visit-stats #busuanzi_value_site_uv,
+footer .visit-stats #busuanzi_value_site_pv {
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-muted);
+}
+
 /* =============== Responsive =============== */
 @media (max-width: 760px) {
     main {
@@ -1040,7 +1051,8 @@ html[data-theme="dark"] {
     .lang-toggle,
     .skip-link,
     .pub-filter,
-    footer a {
+    footer a,
+    footer .visit-stats {
         display: none !important;
     }
 
