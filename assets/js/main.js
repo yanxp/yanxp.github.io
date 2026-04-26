@@ -108,11 +108,13 @@
                 if (!data || typeof data.citations !== 'number' || data.citations <= 0) return;
                 target.textContent = String(data.citations);
                 if (data.h_index) {
+                    var checked = (data.last_checked || data.updated_at || '').slice(0, 10);
                     badge.setAttribute(
                         'title',
                         'Citations: ' + data.citations +
                         ' · h-index: ' + data.h_index +
-                        (data.i10_index ? ' · i10: ' + data.i10_index : '')
+                        (data.i10_index ? ' · i10: ' + data.i10_index : '') +
+                        (checked ? ' · checked ' + checked : '')
                     );
                 }
                 badge.removeAttribute('hidden');
